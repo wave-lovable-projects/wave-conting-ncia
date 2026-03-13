@@ -9,7 +9,6 @@ function filterAndPaginate(filters: BMFilters, pagination: BMPagination) {
     const s = filters.search.toLowerCase();
     items = items.filter(i => i.name.toLowerCase().includes(s) || i.bmId.includes(s));
   }
-  if (!matchesFilter(undefined, undefined)) { /* type guard */ }
   items = items.filter(i => matchesFilter(i.status, filters.status) && matchesFilter(i.supplierId, filters.supplierId));
   const total = items.length;
   const totalPages = Math.max(1, Math.ceil(total / pagination.pageSize));

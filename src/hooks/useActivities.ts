@@ -13,7 +13,6 @@ export function useActivityLogs(filters: ActivityFilters, pagination: ActivityPa
         data = data.filter(a => (a.entityName?.toLowerCase().includes(s)) || a.userName.toLowerCase().includes(s) || JSON.stringify(a.details || {}).toLowerCase().includes(s));
       }
       if (filters.entityTypes?.length) data = data.filter(a => filters.entityTypes!.includes(a.entityType));
-      if (!matchesFilter(undefined, undefined)) { /* placeholder */ }
       data = data.filter(a => matchesFilter(a.userId, filters.userId));
       if (filters.startDate) data = data.filter(a => a.createdAt >= filters.startDate!);
       if (filters.endDate) data = data.filter(a => a.createdAt <= filters.endDate! + 'T23:59:59Z');
