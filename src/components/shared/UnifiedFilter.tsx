@@ -162,6 +162,16 @@ export function UnifiedFilter({ categories, values, onChange }: UnifiedFilterPro
                   );
                 })}
               </CommandList>
+              <div className="flex items-center justify-between p-3 border-t border-border">
+                <Button variant="ghost" size="sm" onClick={() => {
+                  setDraft(prev => ({ ...prev, [activeCategory!]: [] }));
+                }}>
+                  Limpar
+                </Button>
+                <Button size="sm" onClick={apply}>
+                  Aplicar
+                </Button>
+              </div>
             </Command>
           )}
         </PopoverContent>
