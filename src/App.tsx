@@ -23,7 +23,9 @@ import Atividades from "@/pages/Atividades";
 import MetaDashboard from "@/pages/MetaDashboard";
 import NotFound from "@/pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1 } },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
