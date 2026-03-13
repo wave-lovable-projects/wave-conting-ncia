@@ -76,7 +76,9 @@ export function ProfileDialog({ open, onOpenChange, profile }: ProfileDialogProp
     const manager = mockManagers.find(m => m.id === values.managerId);
     const auxiliar = mockManagers.find(m => m.id === values.auxiliarId);
     const payload = {
-      ...values,
+      name: values.name,
+      email: values.email,
+      password: values.password,
       status: values.status as Profile['status'],
       supplierName: supplier?.name,
       managerName: manager?.name,
