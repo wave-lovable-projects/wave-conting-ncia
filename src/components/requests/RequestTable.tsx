@@ -6,11 +6,8 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Eye, Edit } from 'lucide-react';
 import type { Request } from '@/types/request';
+import { REQUEST_TYPE_LABELS } from '@/types/request';
 import { format } from 'date-fns';
-
-const typeLabels: Record<string, string> = {
-  BM: 'BM', ACCOUNT: 'Conta', PROFILE: 'Perfil', BALANCE: 'Saldo', OTHER: 'Outro',
-};
 
 interface Props {
   requests: Request[];
@@ -26,10 +23,11 @@ export function RequestTable({ requests, onView, onEdit }: Props) {
           <TableRow className="bg-surface-1 hover:bg-surface-1">
             <TableHead className="text-muted-foreground">Título</TableHead>
             <TableHead className="text-muted-foreground">Tipo</TableHead>
+            <TableHead className="text-muted-foreground">Qtd</TableHead>
             <TableHead className="text-muted-foreground">Prioridade</TableHead>
             <TableHead className="text-muted-foreground">Status</TableHead>
             <TableHead className="text-muted-foreground">Solicitante</TableHead>
-            <TableHead className="text-muted-foreground">Responsável</TableHead>
+            <TableHead className="text-muted-foreground">Fornecedor</TableHead>
             <TableHead className="text-muted-foreground">Previsão</TableHead>
             <TableHead className="text-muted-foreground">Criado em</TableHead>
           </TableRow>
@@ -54,19 +52,20 @@ export function RequestTable({ requests, onView, onEdit }: Props) {
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant="outline" className="text-xs bg-surface-2 border-border text-muted-foreground">{typeLabels[r.type]}</Badge>
+                <Badge variant="outline" className="text-xs bg-surface-2 border-border text-muted-foreground">{REQUEST_TYPE_LABELS[r.assetType]}</Badge>
               </TableCell>
+              <TableCell className="text-muted-foreground text-sm">{r.quantityDelivered}/{r.quantity}</TableCell>
               <TableCell><PriorityBadge priority={r.priority} /></TableCell>
               <TableCell><StatusBadge status={r.status} /></TableCell>
               <TableCell className="text-muted-foreground text-sm">{r.requesterName}</TableCell>
-              <TableCell className="text-muted-foreground text-sm">{r.assigneeName ?? '—'}</TableCell>
+              <TableCell className="text-muted-foreground text-sm">{r.supplierName ?? '—'}</TableCell>
               <TableCell className="text-muted-foreground text-sm">{r.dueDate ? format(new Date(r.dueDate), 'dd/MM/yyyy') : '—'}</TableCell>
               <TableCell className="text-muted-foreground text-sm">{format(new Date(r.createdAt), 'dd/MM/yyyy')}</TableCell>
             </TableRow>
           ))}
           {requests.length === 0 && (
             <TableRow>
-              <TableCell colSpan={8} className="text-center text-muted-foreground py-8">Nenhuma solicitação encontrada</TableCell>
+              <TableCell colSpan={9} className="text-center text-muted-foreground py-8">Nenhuma solicitação encontrada</TableCell>
             </TableRow>
           )}
         </TableBody>

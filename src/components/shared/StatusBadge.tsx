@@ -2,6 +2,17 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 const statusConfig: Record<string, { label: string; className: string }> = {
+  // Request pipeline statuses
+  PENDENTE: { label: 'Pendente', className: 'bg-warning/15 text-warning border-warning/30' },
+  APROVADA: { label: 'Aprovada', className: 'bg-success/15 text-success border-success/30' },
+  SOLICITADA_FORNECEDOR: { label: 'Solic. Fornecedor', className: 'bg-accent-purple/15 text-accent-purple border-accent-purple/30' },
+  RECEBIDA: { label: 'Recebida', className: 'bg-info/15 text-info border-info/30' },
+  EM_AQUECIMENTO: { label: 'Em Aquecimento', className: 'bg-caution/15 text-caution border-caution/30' },
+  PRONTA: { label: 'Pronta', className: 'bg-success/15 text-success border-success/30' },
+  ENTREGUE: { label: 'Entregue', className: 'bg-success/20 text-success border-success/40' },
+  REJEITADA: { label: 'Rejeitada', className: 'bg-destructive/15 text-destructive border-destructive/30' },
+  CANCELADA: { label: 'Cancelada', className: 'bg-muted text-muted-foreground border-border line-through' },
+  // Legacy / other module statuses
   WARMING: { label: 'Aquecendo', className: 'bg-info/15 text-info border-info/30' },
   ACTIVE: { label: 'Ativa', className: 'bg-success/15 text-success border-success/30' },
   ADVERTISING: { label: 'Anunciando', className: 'bg-accent-purple/15 text-accent-purple border-accent-purple/30' },
@@ -14,7 +25,6 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   PENDING: { label: 'Pendente', className: 'bg-warning/15 text-warning border-warning/30' },
   IN_PROGRESS: { label: 'Em Andamento', className: 'bg-info/15 text-info border-info/30' },
   DONE: { label: 'Concluída', className: 'bg-success/15 text-success border-success/30' },
-  REJECTED: { label: 'Rejeitada', className: 'bg-destructive/15 text-destructive border-destructive/30' },
   ANALYZING: { label: 'Analisando', className: 'bg-accent-purple/15 text-accent-purple border-accent-purple/30' },
   PAUSED: { label: 'Pausada', className: 'bg-warning/15 text-warning border-warning/30' },
   ARCHIVED: { label: 'Arquivada', className: 'bg-muted text-muted-foreground border-border' },
