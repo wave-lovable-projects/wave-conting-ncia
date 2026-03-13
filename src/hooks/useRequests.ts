@@ -6,11 +6,12 @@ import { matchesFilter } from '@/lib/utils';
 function applyFilters(requests: Request[], filters: RequestFilters) {
   return requests.filter((r) => {
     if (filters.search && !r.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
-    if (!matchesFilter(r.type, filters.type)) return false;
+    if (!matchesFilter(r.assetType, filters.assetType)) return false;
     if (!matchesFilter(r.status, filters.status)) return false;
     if (!matchesFilter(r.priority, filters.priority)) return false;
     if (!matchesFilter(r.requesterId, filters.requesterId)) return false;
     if (!matchesFilter(r.assigneeId, filters.assigneeId)) return false;
+    if (!matchesFilter(r.supplierId, filters.supplierId)) return false;
     return true;
   });
 }
@@ -39,10 +40,19 @@ export function useRequest(id: string | null) {
 export function useCreateRequest() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (data: Omit<Request, 'id' | 'createdAt' | 'updatedAt' | 'statusHistory' | 'comments'>) => {
+    mutationFn: async (data: Omit<Request, 'id' | 'createdAt' | 'updatedAt' | 'statusHistory' | 'comments' | 'quantityDelivered' | 'linkedAssetIds'>) => {
       await new Promise((r) => setTimeout(r, 300));
       const all = getMockRequests();
-      const newR: Request = { ...data, id: crypto.randomUUID(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), statusHistory: [], comments: [] };
+      const newR: Request = {
+        ...data,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        statusHistory: [],
+        comments: [],
+        quantityDelivered: 0,
+        linkedAssetIds: [],
+      };
       setMockRequests([newR, ...all]);
       return newR;
     },

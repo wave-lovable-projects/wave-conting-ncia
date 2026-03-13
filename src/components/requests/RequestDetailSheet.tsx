@@ -10,12 +10,9 @@ import { Separator } from '@/components/ui/separator';
 import { useRequest, useUpdateRequestStatus, useAddRequestComment } from '@/hooks/useRequests';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { Send, MessageSquare, Clock } from 'lucide-react';
+import { Send, MessageSquare, Clock, Package, Truck, Flame, Loader2 } from 'lucide-react';
+import { REQUEST_STATUS_LABELS, REQUEST_STATUSES, REQUEST_TYPE_LABELS } from '@/types/request';
 import type { RequestStatus } from '@/types/request';
-
-const typeLabels: Record<string, string> = {
-  BM: 'BM', ACCOUNT: 'Conta', PROFILE: 'Perfil', BALANCE: 'Saldo', OTHER: 'Outro',
-};
 
 interface Props {
   requestId: string | null;
@@ -31,15 +28,23 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
   if (!request) return null;
 
   const handleStatusChange = async (status: string) => {
-    await updateStatus.mutateAsync({ id: request.id, status: status as RequestStatus, changedBy: 'Admin Wave' });
-    toast({ title: 'Status atualizado' });
+    try {
+      await updateStatus.mutateAsync({ id: request.id, status: status as RequestStatus, changedBy: 'Admin Wave' });
+      toast({ title: 'Status atualizado' });
+    } catch {
+      toast({ title: 'Erro ao atualizar status', variant: 'destructive' });
+    }
   };
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
-    await addComment.mutateAsync({ requestId: request.id, text: newComment });
-    setNewComment('');
-    toast({ title: 'Comentário adicionado' });
+    try {
+      await addComment.mutateAsync({ requestId: request.id, text: newComment });
+      setNewComment('');
+      toast({ title: 'Comentário adicionado' });
+    } catch {
+      toast({ title: 'Erro ao adicionar comentário', variant: 'destructive' });
+    }
   };
 
   return (
@@ -49,10 +54,11 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
           <SheetTitle className="text-left">{request.title}</SheetTitle>
         </SheetHeader>
         <div className="space-y-5 mt-4">
+          {/* Basic info */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Tipo</span>
-              <Badge variant="outline" className="text-xs bg-surface-2 border-border text-muted-foreground">{typeLabels[request.type]}</Badge>
+              <Badge variant="outline" className="text-xs bg-surface-2 border-border text-muted-foreground">{REQUEST_TYPE_LABELS[request.assetType]}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Prioridade</span>
@@ -60,26 +66,23 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Status</span>
-              <Select value={request.status} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-40 h-8"><SelectValue /></SelectTrigger>
+              <Select value={request.status} onValueChange={handleStatusChange} disabled={updateStatus.isPending}>
+                <SelectTrigger className="w-48 h-8"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PENDING">Pendente</SelectItem>
-                  <SelectItem value="IN_PROGRESS">Em Andamento</SelectItem>
-                  <SelectItem value="DONE">Concluída</SelectItem>
-                  <SelectItem value="REJECTED">Rejeitada</SelectItem>
+                  {REQUEST_STATUSES.map((s) => (
+                    <SelectItem key={s} value={s}>{REQUEST_STATUS_LABELS[s]}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Quantidade</span>
+              <span className="text-sm text-foreground">{request.quantityDelivered}/{request.quantity}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Solicitante</span>
               <span className="text-sm text-foreground">{request.requesterName}</span>
             </div>
-            {request.assigneeName && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Responsável</span>
-                <span className="text-sm text-foreground">{request.assigneeName}</span>
-              </div>
-            )}
             {request.dueDate && (
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Previsão</span>
@@ -90,6 +93,12 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
               <span className="text-sm text-muted-foreground">Criado em</span>
               <span className="text-sm text-foreground">{format(new Date(request.createdAt), 'dd/MM/yyyy HH:mm')}</span>
             </div>
+            {request.deliveredAt && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Entregue em</span>
+                <span className="text-sm text-foreground">{format(new Date(request.deliveredAt), 'dd/MM/yyyy HH:mm')}</span>
+              </div>
+            )}
           </div>
 
           <Separator />
@@ -98,6 +107,81 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
             <p className="text-sm text-muted-foreground mt-1">{request.description}</p>
           </div>
 
+          {/* Supplier section */}
+          {request.supplierName && (
+            <>
+              <Separator />
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Truck className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">Fornecedor</span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Nome</span><span className="text-foreground">{request.supplierName}</span></div>
+                  {request.supplierOrderId && <div className="flex justify-between"><span className="text-muted-foreground">Pedido</span><span className="text-foreground">{request.supplierOrderId}</span></div>}
+                  {request.supplierCost != null && <div className="flex justify-between"><span className="text-muted-foreground">Custo</span><span className="text-foreground">R$ {request.supplierCost.toFixed(2)}</span></div>}
+                  {request.supplierOrderDate && <div className="flex justify-between"><span className="text-muted-foreground">Data do Pedido</span><span className="text-foreground">{format(new Date(request.supplierOrderDate), 'dd/MM/yyyy')}</span></div>}
+                  {request.supplierExpectedDate && <div className="flex justify-between"><span className="text-muted-foreground">Previsão Fornecedor</span><span className="text-foreground">{format(new Date(request.supplierExpectedDate), 'dd/MM/yyyy')}</span></div>}
+                  {request.supplierReceivedDate && <div className="flex justify-between"><span className="text-muted-foreground">Recebido em</span><span className="text-foreground">{format(new Date(request.supplierReceivedDate), 'dd/MM/yyyy')}</span></div>}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Warming section */}
+          {(request.warmingStartDate || request.warmingEndDate) && (
+            <>
+              <Separator />
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Flame className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">Aquecimento</span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  {request.warmingStartDate && <div className="flex justify-between"><span className="text-muted-foreground">Início</span><span className="text-foreground">{format(new Date(request.warmingStartDate), 'dd/MM/yyyy')}</span></div>}
+                  {request.warmingEndDate && <div className="flex justify-between"><span className="text-muted-foreground">Fim</span><span className="text-foreground">{format(new Date(request.warmingEndDate), 'dd/MM/yyyy')}</span></div>}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Linked assets */}
+          {request.linkedAssetIds.length > 0 && (
+            <>
+              <Separator />
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">Ativos Vinculados ({request.linkedAssetIds.length})</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {request.linkedAssetIds.map((id) => (
+                    <Badge key={id} variant="outline" className="text-xs bg-surface-2 border-border text-muted-foreground">{id}</Badge>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Specifications */}
+          {request.specifications && Object.keys(request.specifications).length > 0 && (
+            <>
+              <Separator />
+              <div>
+                <span className="text-sm font-medium text-foreground">Especificações</span>
+                <div className="space-y-1.5 mt-2">
+                  {Object.entries(request.specifications).map(([key, val]) => (
+                    <div key={key} className="flex justify-between text-sm">
+                      <span className="text-muted-foreground capitalize">{key.replace(/_/g, ' ')}</span>
+                      <span className="text-foreground">{val}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Status history */}
           {request.statusHistory.length > 0 && (
             <>
               <Separator />
@@ -125,6 +209,7 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
             </>
           )}
 
+          {/* Comments */}
           <Separator />
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -148,7 +233,7 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
             <div className="flex gap-2">
               <Textarea value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Adicionar comentário..." rows={2} className="flex-1" />
               <Button size="icon" onClick={handleAddComment} disabled={addComment.isPending || !newComment.trim()}>
-                <Send className="h-4 w-4" />
+                {addComment.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               </Button>
             </div>
           </div>

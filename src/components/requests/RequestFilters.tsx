@@ -4,28 +4,18 @@ import { Search } from 'lucide-react';
 import { UnifiedFilter } from '@/components/shared/UnifiedFilter';
 import type { FilterCategory } from '@/components/shared/UnifiedFilter';
 import type { RequestFilters } from '@/types/request';
+import { REQUEST_STATUS_LABELS, REQUEST_TYPE_LABELS, REQUEST_STATUSES, REQUEST_TYPES } from '@/types/request';
 
 interface Props {
   filters: RequestFilters;
   onFilterChange: (f: Partial<RequestFilters>) => void;
 }
 
-const FILTER_KEYS = ['type', 'status', 'priority'] as const;
+const FILTER_KEYS = ['assetType', 'status', 'priority'] as const;
 
 const categories: FilterCategory[] = [
-  { key: 'type', label: 'Tipo', options: [
-    { value: 'BM', label: 'BM' },
-    { value: 'ACCOUNT', label: 'Conta' },
-    { value: 'PROFILE', label: 'Perfil' },
-    { value: 'BALANCE', label: 'Saldo' },
-    { value: 'OTHER', label: 'Outro' },
-  ]},
-  { key: 'status', label: 'Status', options: [
-    { value: 'PENDING', label: 'Pendente' },
-    { value: 'IN_PROGRESS', label: 'Em Andamento' },
-    { value: 'DONE', label: 'Concluída' },
-    { value: 'REJECTED', label: 'Rejeitada' },
-  ]},
+  { key: 'assetType', label: 'Tipo', options: REQUEST_TYPES.map((t) => ({ value: t, label: REQUEST_TYPE_LABELS[t] })) },
+  { key: 'status', label: 'Status', options: REQUEST_STATUSES.map((s) => ({ value: s, label: REQUEST_STATUS_LABELS[s] })) },
   { key: 'priority', label: 'Prioridade', options: [
     { value: 'LOW', label: 'Baixa' },
     { value: 'MEDIUM', label: 'Média' },
