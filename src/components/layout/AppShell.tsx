@@ -4,6 +4,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { Header } from './Header';
 import { useAuth } from '@/hooks/useAuth';
+import { FloatingSuggestionButton } from '@/components/suggestions/FloatingSuggestionButton';
 
 export function AppShell() {
   const { restoreUser } = useAuth();
@@ -23,6 +24,7 @@ export function AppShell() {
           </main>
         </div>
       </div>
+      <FloatingSuggestionButton />
     </SidebarProvider>
   );
 }

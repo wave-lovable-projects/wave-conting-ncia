@@ -1,0 +1,36 @@
+import type { ActivityLog } from '@/types/activity';
+
+const mockActivities: ActivityLog[] = [
+  { id: 'act-1', userId: 'u1', userName: 'Admin Wave', action: 'created', entityType: 'AD_ACCOUNT', entityId: '18', entityName: 'Conta Info 18', createdAt: '2025-03-12T15:30:00Z' },
+  { id: 'act-2', userId: 'u2', userName: 'Carlos Silva', action: 'updated', entityType: 'AD_ACCOUNT', entityId: '1', entityName: 'Conta Ecomm 01', details: { field: 'accountStatus', oldValue: 'DISABLED', newValue: 'ACTIVE' }, createdAt: '2025-03-12T14:00:00Z' },
+  { id: 'act-3', userId: 'u3', userName: 'Ana Oliveira', action: 'created', entityType: 'BUSINESS_MANAGER', entityId: 'bm-11', entityName: 'BM Misto Backup', createdAt: '2025-03-12T12:00:00Z' },
+  { id: 'act-4', userId: 'u1', userName: 'Admin Wave', action: 'deleted', entityType: 'PROFILE', entityId: 'pf-99', entityName: 'Perfil Teste Excluído', createdAt: '2025-03-12T10:00:00Z' },
+  { id: 'act-5', userId: 'u4', userName: 'Rafael Santos', action: 'updated', entityType: 'PROFILE', entityId: 'pf-1', entityName: 'Perfil Admin 01', details: { field: 'status', oldValue: 'DISABLED', newValue: 'ACTIVE' }, createdAt: '2025-03-11T16:00:00Z' },
+  { id: 'act-6', userId: 'u2', userName: 'Carlos Silva', action: 'imported', entityType: 'AD_ACCOUNT', entityId: 'batch-1', entityName: 'Lote 15 contas', details: { count: 15 }, createdAt: '2025-03-11T14:00:00Z' },
+  { id: 'act-7', userId: 'u3', userName: 'Ana Oliveira', action: 'updated', entityType: 'PAGE', entityId: 'pg-3', entityName: 'Página Blog Info', details: { field: 'status', oldValue: 'ACTIVE', newValue: 'DISABLED' }, createdAt: '2025-03-11T11:00:00Z' },
+  { id: 'act-8', userId: 'u5', userName: 'Juliana Costa', action: 'created', entityType: 'SUPPLIER', entityId: 'sup-4', entityName: 'Social Reach', createdAt: '2025-03-11T09:00:00Z' },
+  { id: 'act-9', userId: 'u1', userName: 'Admin Wave', action: 'updated', entityType: 'USER', entityId: 'u9', entityName: 'Lucas Ferreira', details: { field: 'isActive', oldValue: 'true', newValue: 'false' }, createdAt: '2025-03-10T17:00:00Z' },
+  { id: 'act-10', userId: 'u2', userName: 'Carlos Silva', action: 'created', entityType: 'REQUEST', entityId: 'req-5', entityName: 'Solicitar novo BM', createdAt: '2025-03-10T15:00:00Z' },
+  { id: 'act-11', userId: 'u4', userName: 'Rafael Santos', action: 'updated', entityType: 'PIXEL', entityId: 'px-6', entityName: 'Pixel Funil', details: { field: 'status', oldValue: 'ACTIVE', newValue: 'DISABLED' }, createdAt: '2025-03-10T13:00:00Z' },
+  { id: 'act-12', userId: 'u3', userName: 'Ana Oliveira', action: 'created', entityType: 'AD_ACCOUNT', entityId: '19', entityName: 'Conta Saúde 19', createdAt: '2025-03-10T10:00:00Z' },
+  { id: 'act-13', userId: 'u1', userName: 'Admin Wave', action: 'updated', entityType: 'SUPPLIER', entityId: 'sup-1', entityName: 'DigitalAds BR', details: { field: 'status', oldValue: 'INACTIVE', newValue: 'ACTIVE' }, createdAt: '2025-03-09T16:00:00Z' },
+  { id: 'act-14', userId: 'u5', userName: 'Juliana Costa', action: 'created', entityType: 'PROFILE', entityId: 'pf-7', entityName: 'Perfil Novo 07', createdAt: '2025-03-09T14:00:00Z' },
+  { id: 'act-15', userId: 'u2', userName: 'Carlos Silva', action: 'deleted', entityType: 'PIXEL', entityId: 'px-99', entityName: 'Pixel Descontinuado', createdAt: '2025-03-09T11:00:00Z' },
+  { id: 'act-16', userId: 'u4', userName: 'Rafael Santos', action: 'imported', entityType: 'PAGE', entityId: 'batch-2', entityName: 'Lote 8 páginas', details: { count: 8 }, createdAt: '2025-03-09T09:00:00Z' },
+  { id: 'act-17', userId: 'u3', userName: 'Ana Oliveira', action: 'updated', entityType: 'BUSINESS_MANAGER', entityId: 'bm-5', entityName: 'BM Misto Geral', details: { field: 'status', oldValue: 'ACTIVE', newValue: 'BLOCKED' }, createdAt: '2025-03-08T15:00:00Z' },
+  { id: 'act-18', userId: 'u1', userName: 'Admin Wave', action: 'created', entityType: 'USER', entityId: 'u10', entityName: 'Beatriz Almeida', createdAt: '2025-03-08T12:00:00Z' },
+  { id: 'act-19', userId: 'u2', userName: 'Carlos Silva', action: 'updated', entityType: 'AD_ACCOUNT', entityId: '5', entityName: 'Conta Edu 05', details: { field: 'usageStatus', oldValue: 'IN_USE', newValue: 'STANDBY' }, createdAt: '2025-03-08T10:00:00Z' },
+  { id: 'act-20', userId: 'u5', userName: 'Juliana Costa', action: 'created', entityType: 'BUSINESS_MANAGER', entityId: 'bm-10', entityName: 'BM Páginas Social', createdAt: '2025-03-07T16:00:00Z' },
+  { id: 'act-21', userId: 'u4', userName: 'Rafael Santos', action: 'updated', entityType: 'PROFILE', entityId: 'pf-5', entityName: 'Perfil Bloqueado 05', details: { field: 'status', oldValue: 'ACTIVE', newValue: 'BLOCKED' }, createdAt: '2025-03-07T13:00:00Z' },
+  { id: 'act-22', userId: 'u3', userName: 'Ana Oliveira', action: 'created', entityType: 'PAGE', entityId: 'pg-9', entityName: 'Página Marca Nova', createdAt: '2025-03-07T10:00:00Z' },
+  { id: 'act-23', userId: 'u1', userName: 'Admin Wave', action: 'imported', entityType: 'AD_ACCOUNT', entityId: 'batch-3', entityName: 'Lote 20 contas', details: { count: 20 }, createdAt: '2025-03-06T15:00:00Z' },
+  { id: 'act-24', userId: 'u2', userName: 'Carlos Silva', action: 'updated', entityType: 'REQUEST', entityId: 'req-3', entityName: 'Trocar BM da conta', details: { field: 'status', oldValue: 'PENDING', newValue: 'IN_PROGRESS' }, createdAt: '2025-03-06T12:00:00Z' },
+  { id: 'act-25', userId: 'u5', userName: 'Juliana Costa', action: 'deleted', entityType: 'PAGE', entityId: 'pg-99', entityName: 'Página Descontinuada', createdAt: '2025-03-06T09:00:00Z' },
+  { id: 'act-26', userId: 'u4', userName: 'Rafael Santos', action: 'created', entityType: 'PIXEL', entityId: 'px-10', entityName: 'Pixel Remarketing', createdAt: '2025-03-05T14:00:00Z' },
+  { id: 'act-27', userId: 'u3', userName: 'Ana Oliveira', action: 'updated', entityType: 'AD_ACCOUNT', entityId: '10', entityName: 'Conta Info 10', details: { field: 'accountStatus', oldValue: 'ACTIVE', newValue: 'ROLLBACK' }, createdAt: '2025-03-05T11:00:00Z' },
+  { id: 'act-28', userId: 'u1', userName: 'Admin Wave', action: 'updated', entityType: 'USER', entityId: 'u8', entityName: 'Pedro Mendes', details: { field: 'role', oldValue: 'AUXILIAR', newValue: 'GESTOR' }, createdAt: '2025-03-05T09:00:00Z' },
+  { id: 'act-29', userId: 'u2', userName: 'Carlos Silva', action: 'created', entityType: 'SUPPLIER', entityId: 'sup-3', entityName: 'AdsPower Pro', createdAt: '2025-03-04T15:00:00Z' },
+  { id: 'act-30', userId: 'u5', userName: 'Juliana Costa', action: 'imported', entityType: 'PROFILE', entityId: 'batch-4', entityName: 'Lote 5 perfis', details: { count: 5 }, createdAt: '2025-03-04T10:00:00Z' },
+];
+
+export function getMockActivities() { return [...mockActivities]; }

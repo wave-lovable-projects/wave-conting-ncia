@@ -13,6 +13,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   IN_PROGRESS: { label: 'Em Andamento', className: 'bg-info/15 text-info border-info/30' },
   DONE: { label: 'Concluída', className: 'bg-success/15 text-success border-success/30' },
   REJECTED: { label: 'Rejeitada', className: 'bg-destructive/15 text-destructive border-destructive/30' },
+  ANALYZING: { label: 'Analisando', className: 'bg-accent-purple/15 text-accent-purple border-accent-purple/30' },
 };
 
 interface StatusBadgeProps {
