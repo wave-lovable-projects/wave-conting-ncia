@@ -24,7 +24,7 @@ export function AppShell() {
           </main>
         </div>
       </div>
-      <FloatingSuggestionButton />
+      
     </SidebarProvider>
   );
 }
