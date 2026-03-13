@@ -11,7 +11,6 @@ function applyFilters(accounts: AdAccount[], filters: AdAccountFilters) {
     }
     if (!matchesFilter(a.accountStatus, filters.accountStatus)) return false;
     if (!matchesFilter(a.usageStatus, filters.usageStatus)) return false;
-    if (filters.balanceRemoved === 'true' && !a.balanceRemoved) return false;
     if (!matchesFilter(a.managerId, filters.managerId)) return false;
     if (!matchesFilter(a.niche, filters.niche)) return false;
     if (!matchesFilter(a.supplierId, filters.supplierId)) return false;
@@ -42,11 +41,12 @@ export function useAdAccountStats() {
       const all = getMockAdAccounts();
       return {
         total: all.length,
+        warming: all.filter((a) => a.accountStatus === 'WARMING').length,
         active: all.filter((a) => a.accountStatus === 'ACTIVE').length,
+        advertising: all.filter((a) => a.accountStatus === 'ADVERTISING').length,
         disabled: all.filter((a) => a.accountStatus === 'DISABLED').length,
         rollback: all.filter((a) => a.accountStatus === 'ROLLBACK').length,
         inUse: all.filter((a) => a.usageStatus === 'IN_USE').length,
-        balanceRemoved: all.filter((a) => a.balanceRemoved).length,
       };
     },
   });
