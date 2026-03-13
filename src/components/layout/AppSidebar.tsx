@@ -70,7 +70,6 @@ const outrosItems: NavItem[] = [
 
 const metaItems: NavItem[] = [
   { title: 'Dashboard', url: '/meta', icon: Zap },
-  { title: 'Campanhas', url: '/meta/campanhas', icon: CreditCard },
 ];
 
 function SidebarNavSection({

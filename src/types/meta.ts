@@ -18,23 +18,6 @@ export interface MetaAccountSummary {
   internalAccountId: string;
 }
 
-export type MetaCampaignStatus = 'ACTIVE' | 'PAUSED' | 'ARCHIVED' | 'DELETED';
-
-export interface MetaCampaign {
-  id: string;
-  metaId: string;
-  adAccountId: string;
-  accountName: string;
-  name: string;
-  status: MetaCampaignStatus;
-  objective?: string;
-  budget?: number;
-  budgetType?: 'DAILY' | 'LIFETIME';
-  startTime?: string;
-  stopTime?: string;
-  lastSyncAt: string;
-}
-
 export interface MetaInsight {
   campaignId: string;
   date: string;
@@ -60,12 +43,4 @@ export interface MetaAlert {
   assetName?: string;
   description: string;
   createdAt: string;
-}
-
-export interface MetaCampaignFilters {
-  accountId?: string;
-  status?: MetaCampaignStatus | '';
-  search?: string;
-  from?: string;
-  to?: string;
 }
