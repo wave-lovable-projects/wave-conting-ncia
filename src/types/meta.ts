@@ -62,10 +62,3 @@ export interface MetaAlert {
   createdAt: string;
 }
 
-export interface MetaCampaignFilters {
-  accountId?: string;
-  status?: MetaCampaignStatus | '';
-  search?: string;
-  from?: string;
-  to?: string;
-}

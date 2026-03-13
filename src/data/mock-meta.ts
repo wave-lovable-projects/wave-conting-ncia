@@ -1,4 +1,4 @@
-import type { MetaAuthStatus, MetaAccountSummary, MetaCampaign, MetaInsight, MetaAlert } from '@/types/meta';
+import type { MetaAuthStatus, MetaAccountSummary, MetaInsight, MetaAlert } from '@/types/meta';
 
 let mockAuthStatus: MetaAuthStatus = {
   connected: true,
@@ -17,17 +17,18 @@ export const mockMetaAccounts: MetaAccountSummary[] = [
   { id: 'ma4', accountId: 'act_4567890123', name: 'Finanças Digital', status: 'ACTIVE', currency: 'USD', timezone: 'America/New_York', balance: 8750.25, spendCap: 100000, lastSyncAt: '2026-03-13T10:32:00Z', internalAccountId: '4' },
 ];
 
-export const mockMetaCampaigns: MetaCampaign[] = [
-  { id: 'mc1', metaId: '23851234567890', adAccountId: 'ma1', accountName: 'Ecommerce Principal', name: 'Black Friday - Conversões', status: 'ACTIVE', objective: 'CONVERSIONS', budget: 500, budgetType: 'DAILY', startTime: '2026-03-01T00:00:00Z', lastSyncAt: '2026-03-13T10:30:00Z' },
-  { id: 'mc2', metaId: '23851234567891', adAccountId: 'ma1', accountName: 'Ecommerce Principal', name: 'Remarketing Carrinho', status: 'ACTIVE', objective: 'CONVERSIONS', budget: 200, budgetType: 'DAILY', startTime: '2026-02-15T00:00:00Z', lastSyncAt: '2026-03-13T10:30:00Z' },
-  { id: 'mc3', metaId: '23851234567892', adAccountId: 'ma1', accountName: 'Ecommerce Principal', name: 'Prospecting LAL', status: 'PAUSED', objective: 'REACH', budget: 1500, budgetType: 'LIFETIME', startTime: '2026-01-10T00:00:00Z', stopTime: '2026-02-28T23:59:59Z', lastSyncAt: '2026-03-13T10:30:00Z' },
-  { id: 'mc4', metaId: '23851234567893', adAccountId: 'ma2', accountName: 'Infoprodutos BR', name: 'Lançamento Curso X', status: 'ACTIVE', objective: 'CONVERSIONS', budget: 1000, budgetType: 'DAILY', startTime: '2026-03-05T00:00:00Z', lastSyncAt: '2026-03-13T10:28:00Z' },
-  { id: 'mc5', metaId: '23851234567894', adAccountId: 'ma2', accountName: 'Infoprodutos BR', name: 'Webinar Tráfego', status: 'ACTIVE', objective: 'TRAFFIC', budget: 300, budgetType: 'DAILY', startTime: '2026-03-08T00:00:00Z', lastSyncAt: '2026-03-13T10:28:00Z' },
-  { id: 'mc6', metaId: '23851234567895', adAccountId: 'ma2', accountName: 'Infoprodutos BR', name: 'Branding Institucional', status: 'ARCHIVED', objective: 'BRAND_AWARENESS', budget: 5000, budgetType: 'LIFETIME', startTime: '2025-12-01T00:00:00Z', stopTime: '2026-01-31T23:59:59Z', lastSyncAt: '2026-03-13T10:28:00Z' },
-  { id: 'mc7', metaId: '23851234567896', adAccountId: 'ma3', accountName: 'Saúde & Bem-Estar', name: 'Suplementos Verão', status: 'DELETED', objective: 'CONVERSIONS', budget: 400, budgetType: 'DAILY', startTime: '2026-01-05T00:00:00Z', stopTime: '2026-02-15T23:59:59Z', lastSyncAt: '2026-03-13T10:25:00Z' },
-  { id: 'mc8', metaId: '23851234567897', adAccountId: 'ma4', accountName: 'Finanças Digital', name: 'App Install - iOS', status: 'ACTIVE', objective: 'APP_INSTALLS', budget: 800, budgetType: 'DAILY', startTime: '2026-03-01T00:00:00Z', lastSyncAt: '2026-03-13T10:32:00Z' },
-  { id: 'mc9', metaId: '23851234567898', adAccountId: 'ma4', accountName: 'Finanças Digital', name: 'Retargeting Website', status: 'PAUSED', objective: 'CONVERSIONS', budget: 250, budgetType: 'DAILY', startTime: '2026-02-20T00:00:00Z', lastSyncAt: '2026-03-13T10:32:00Z' },
-  { id: 'mc10', metaId: '23851234567899', adAccountId: 'ma4', accountName: 'Finanças Digital', name: 'Lead Gen - Consultoria', status: 'ACTIVE', objective: 'LEAD_GENERATION', budget: 600, budgetType: 'DAILY', startTime: '2026-03-10T00:00:00Z', lastSyncAt: '2026-03-13T10:32:00Z' },
+// Campaign IDs used internally for insights generation
+const campaignAccountMap: { id: string; adAccountId: string }[] = [
+  { id: 'mc1', adAccountId: 'ma1' },
+  { id: 'mc2', adAccountId: 'ma1' },
+  { id: 'mc3', adAccountId: 'ma1' },
+  { id: 'mc4', adAccountId: 'ma2' },
+  { id: 'mc5', adAccountId: 'ma2' },
+  { id: 'mc6', adAccountId: 'ma2' },
+  { id: 'mc7', adAccountId: 'ma3' },
+  { id: 'mc8', adAccountId: 'ma4' },
+  { id: 'mc9', adAccountId: 'ma4' },
+  { id: 'mc10', adAccountId: 'ma4' },
 ];
 
 function generateInsights(campaignId: string, days: number): MetaInsight[] {
@@ -61,9 +62,11 @@ function generateInsights(campaignId: string, days: number): MetaInsight[] {
 }
 
 export const mockInsightsMap: Record<string, MetaInsight[]> = {};
-mockMetaCampaigns.forEach((c) => {
+campaignAccountMap.forEach((c) => {
   mockInsightsMap[c.id] = generateInsights(c.id, 30);
 });
+
+export { campaignAccountMap };
 
 export const mockMetaAlerts: MetaAlert[] = [
   { id: 'al1', type: 'account_disabled', accountId: 'ma3', accountName: 'Saúde & Bem-Estar', description: 'Conta de anúncio desativada por violação de política.', createdAt: '2026-03-12T14:30:00Z' },

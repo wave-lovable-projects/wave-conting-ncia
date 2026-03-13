@@ -55,7 +55,7 @@ const App = () => (
               <Route path="/usuarios" element={<Usuarios />} />
               <Route path="/atividades" element={<Atividades />} />
               <Route path="/meta" element={<MetaDashboard />} />
-              <Route path="/meta/campanhas" element={<MetaCampaigns />} />
+              
               <Route path="/meta/callback" element={<MetaCallback />} />
             </Route>
           </Route>
