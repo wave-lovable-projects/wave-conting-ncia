@@ -9,7 +9,7 @@ import {
   Users,
   Search,
   Activity,
-  Lightbulb,
+  
   Zap,
   PanelLeftClose,
   PanelLeft,
