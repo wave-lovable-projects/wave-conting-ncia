@@ -21,7 +21,7 @@ import Sugestoes from "@/pages/Sugestoes";
 import Usuarios from "@/pages/Usuarios";
 import Atividades from "@/pages/Atividades";
 import MetaDashboard from "@/pages/MetaDashboard";
-import MetaCampaigns from "@/pages/MetaCampaigns";
+
 import MetaCallback from "@/pages/MetaCallback";
 import NotFound from "@/pages/NotFound";
 
