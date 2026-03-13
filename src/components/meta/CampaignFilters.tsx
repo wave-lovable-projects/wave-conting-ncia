@@ -1,26 +1,45 @@
-import { Search, X } from 'lucide-react';
+import { useMemo } from 'react';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+import { Search } from 'lucide-react';
+import { UnifiedFilter } from '@/components/shared/UnifiedFilter';
+import type { FilterCategory } from '@/components/shared/UnifiedFilter';
 import { useMetaAccounts } from '@/hooks/useMeta';
 import type { MetaCampaignFilters } from '@/types/meta';
-
-const CAMPAIGN_STATUSES = [
-  { value: 'ACTIVE', label: 'Ativa' },
-  { value: 'PAUSED', label: 'Pausada' },
-  { value: 'ARCHIVED', label: 'Arquivada' },
-  { value: 'DELETED', label: 'Excluída' },
-] as const;
 
 interface Props {
   filters: MetaCampaignFilters;
   onChange: (f: MetaCampaignFilters) => void;
 }
 
+const CAMPAIGN_STATUSES = [
+  { value: 'ACTIVE', label: 'Ativa' },
+  { value: 'PAUSED', label: 'Pausada' },
+  { value: 'ARCHIVED', label: 'Arquivada' },
+  { value: 'DELETED', label: 'Excluída' },
+];
+
 export function CampaignFiltersBar({ filters, onChange }: Props) {
   const { data: accounts } = useMetaAccounts();
 
-  const hasFilters = filters.accountId || filters.status || filters.search;
+  const categories: FilterCategory[] = useMemo(() => [
+    { key: 'accountId', label: 'Conta', options: (accounts || []).map((acc) => ({ value: acc.id, label: acc.name })) },
+    { key: 'status', label: 'Status', options: CAMPAIGN_STATUSES },
+  ], [accounts]);
+
+  const values = useMemo(() => {
+    const v: Record<string, string[]> = {};
+    if (filters.accountId) v.accountId = filters.accountId.split(',');
+    if (filters.status) v.status = [filters.status];
+    return v;
+  }, [filters]);
+
+  const handleChange = (vals: Record<string, string[]>) => {
+    onChange({
+      ...filters,
+      accountId: vals.accountId?.length ? vals.accountId.join(',') : '',
+      status: vals.status?.[0] as any || '',
+    });
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -33,42 +52,7 @@ export function CampaignFiltersBar({ filters, onChange }: Props) {
           className="pl-9"
         />
       </div>
-
-      <Select
-        value={filters.accountId || 'all'}
-        onValueChange={(v) => onChange({ ...filters, accountId: v === 'all' ? '' : v })}
-      >
-        <SelectTrigger className="w-[200px]">
-          <SelectValue placeholder="Todas as contas" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todas as contas</SelectItem>
-          {accounts?.map((acc) => (
-            <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select
-        value={filters.status || 'all'}
-        onValueChange={(v) => onChange({ ...filters, status: v === 'all' ? '' : v as any })}
-      >
-        <SelectTrigger className="w-[150px]">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos</SelectItem>
-          {CAMPAIGN_STATUSES.map((s) => (
-            <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      {hasFilters && (
-        <Button variant="ghost" size="sm" onClick={() => onChange({})}>
-          <X className="h-4 w-4 mr-1" /> Limpar
-        </Button>
-      )}
+      <UnifiedFilter categories={categories} values={values} onChange={handleChange} />
     </div>
   );
 }

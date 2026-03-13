@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Search, X } from 'lucide-react';
+import { Search } from 'lucide-react';
+import { UnifiedFilter } from '@/components/shared/UnifiedFilter';
+import type { FilterCategory } from '@/components/shared/UnifiedFilter';
 import type { PixelFilters } from '@/types/pixel';
 import { getMockBMs } from '@/data/mock-business-managers';
 
@@ -19,39 +20,45 @@ interface PixelFiltersBarProps {
   onClear: () => void;
 }
 
+const FILTER_KEYS = ['status', 'supplierId', 'bmId'] as const;
+
 export function PixelFiltersBar({ filters, searchValue, onSearchChange, onFilterChange, onClear }: PixelFiltersBarProps) {
   const bms = getMockBMs();
-  const hasFilters = filters.status || filters.supplierId || filters.bmId || searchValue;
+
+  const categories: FilterCategory[] = useMemo(() => [
+    { key: 'status', label: 'Status', options: [
+      { value: 'ACTIVE', label: 'Ativo' },
+      { value: 'DISABLED', label: 'Desativado' },
+      { value: 'BLOCKED', label: 'Bloqueado' },
+    ]},
+    { key: 'supplierId', label: 'Fornecedor', options: mockSuppliers.map((s) => ({ value: s.id, label: s.name })) },
+    { key: 'bmId', label: 'BM Vinculada', options: bms.map((b) => ({ value: b.id, label: b.name })) },
+  ], [bms]);
+
+  const values = useMemo(() => {
+    const v: Record<string, string[]> = {};
+    for (const key of FILTER_KEYS) {
+      const val = filters[key];
+      if (val) v[key] = val.split(',');
+    }
+    return v;
+  }, [filters]);
+
+  const handleChange = (vals: Record<string, string[]>) => {
+    const partial: Partial<PixelFilters> = {};
+    for (const key of FILTER_KEYS) {
+      partial[key] = vals[key]?.length ? vals[key].join(',') : undefined;
+    }
+    onFilterChange(partial);
+  };
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div className="relative flex-1 min-w-[200px] max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Buscar por nome ou Pixel ID…" value={searchValue} onChange={e => onSearchChange(e.target.value)} className="pl-9" />
+        <Input placeholder="Buscar por nome ou Pixel ID…" value={searchValue} onChange={(e) => onSearchChange(e.target.value)} className="pl-9" />
       </div>
-      <Select value={filters.status || 'ALL'} onValueChange={v => onFilterChange({ status: v === 'ALL' ? undefined : v })}>
-        <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ALL">Todos</SelectItem>
-          <SelectItem value="ACTIVE">Ativo</SelectItem>
-          <SelectItem value="DISABLED">Desativado</SelectItem>
-          <SelectItem value="BLOCKED">Bloqueado</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select value={filters.supplierId || 'ALL'} onValueChange={v => onFilterChange({ supplierId: v === 'ALL' ? undefined : v })}>
-        <SelectTrigger className="w-[180px]"><SelectValue placeholder="Fornecedor" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ALL">Todos</SelectItem>
-          {mockSuppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-        </SelectContent>
-      </Select>
-      <Select value={filters.bmId || 'ALL'} onValueChange={v => onFilterChange({ bmId: v === 'ALL' ? undefined : v })}>
-        <SelectTrigger className="w-[200px]"><SelectValue placeholder="BM Vinculada" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ALL">Todas</SelectItem>
-          {bms.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
-        </SelectContent>
-      </Select>
-      {hasFilters && <Button variant="ghost" size="sm" onClick={onClear}><X className="h-4 w-4 mr-1" /> Limpar</Button>}
+      <UnifiedFilter categories={categories} values={values} onChange={handleChange} />
     </div>
   );
 }

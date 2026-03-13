@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getMockActivities } from '@/data/mock-activities';
 import type { ActivityFilters, ActivityPagination } from '@/types/activity';
+import { matchesFilter } from '@/lib/utils';
 
 export function useActivityLogs(filters: ActivityFilters, pagination: ActivityPagination) {
   return useQuery({
@@ -12,7 +13,7 @@ export function useActivityLogs(filters: ActivityFilters, pagination: ActivityPa
         data = data.filter(a => (a.entityName?.toLowerCase().includes(s)) || a.userName.toLowerCase().includes(s) || JSON.stringify(a.details || {}).toLowerCase().includes(s));
       }
       if (filters.entityTypes?.length) data = data.filter(a => filters.entityTypes!.includes(a.entityType));
-      if (filters.userId) data = data.filter(a => a.userId === filters.userId);
+      data = data.filter(a => matchesFilter(a.userId, filters.userId));
       if (filters.startDate) data = data.filter(a => a.createdAt >= filters.startDate!);
       if (filters.endDate) data = data.filter(a => a.createdAt <= filters.endDate! + 'T23:59:59Z');
 

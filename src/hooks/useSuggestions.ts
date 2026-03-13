@@ -2,13 +2,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMockSuggestions, setMockSuggestions, getMockSuggestionComments, setMockSuggestionComments } from '@/data/mock-suggestions';
 import type { Suggestion, SuggestionComment, SuggestionFilters } from '@/types/suggestion';
 import { toast } from 'sonner';
+import { matchesFilter } from '@/lib/utils';
 
 export function useSuggestions(filters: SuggestionFilters) {
   return useQuery({
     queryKey: ['suggestions', filters],
     queryFn: () => {
       let data = getMockSuggestions();
-      if (filters.status) data = data.filter(s => s.status === filters.status);
+      if (filters.status) data = data.filter(s => matchesFilter(s.status, filters.status));
       if (filters.page) data = data.filter(s => s.page === filters.page);
 
       switch (filters.sortBy) {

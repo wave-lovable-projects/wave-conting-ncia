@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMockPixels, setMockPixels } from '@/data/mock-pixels';
 import type { Pixel, PixelFilters, PixelPagination } from '@/types/pixel';
+import { matchesFilter } from '@/lib/utils';
 
 function filterAndPaginate(filters: PixelFilters, pagination: PixelPagination) {
   let items = getMockPixels();
@@ -8,9 +9,7 @@ function filterAndPaginate(filters: PixelFilters, pagination: PixelPagination) {
     const s = filters.search.toLowerCase();
     items = items.filter(i => i.name.toLowerCase().includes(s) || i.pixelId.includes(s));
   }
-  if (filters.status) items = items.filter(i => i.status === filters.status);
-  if (filters.supplierId) items = items.filter(i => i.supplierId === filters.supplierId);
-  if (filters.bmId) items = items.filter(i => i.bmId === filters.bmId);
+  items = items.filter(i => matchesFilter(i.status, filters.status) && matchesFilter(i.supplierId, filters.supplierId) && matchesFilter(i.bmId, filters.bmId));
   const total = items.length;
   const totalPages = Math.max(1, Math.ceil(total / pagination.pageSize));
   const start = (pagination.page - 1) * pagination.pageSize;

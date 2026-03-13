@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMockProfiles, setMockProfiles, getMockCheckpoints, setMockCheckpoints, getMockWarmingActions, setMockWarmingActions, getMockAnnotations, setMockAnnotations, getMockComments, setMockComments } from '@/data/mock-profiles';
 import type { Profile, ProfileCheckpoint, WarmingAction, ProfileAnnotation, ProfileComment, ProfileFilters, ProfilePagination } from '@/types/profile';
+import { matchesFilter } from '@/lib/utils';
 
 function filterAndPaginate(filters: ProfileFilters, pagination: ProfilePagination) {
   let items = getMockProfiles();
@@ -8,9 +9,7 @@ function filterAndPaginate(filters: ProfileFilters, pagination: ProfilePaginatio
     const s = filters.search.toLowerCase();
     items = items.filter(i => i.name.toLowerCase().includes(s) || i.email.toLowerCase().includes(s));
   }
-  if (filters.status) items = items.filter(i => i.status === filters.status);
-  if (filters.supplierId) items = items.filter(i => i.supplierId === filters.supplierId);
-  if (filters.managerId) items = items.filter(i => i.managerId === filters.managerId);
+  items = items.filter(i => matchesFilter(i.status, filters.status) && matchesFilter(i.supplierId, filters.supplierId) && matchesFilter(i.managerId, filters.managerId));
   const total = items.length;
   const totalPages = Math.max(1, Math.ceil(total / pagination.pageSize));
   const start = (pagination.page - 1) * pagination.pageSize;
