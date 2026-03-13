@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AdAccount, AdAccountFilters, AdAccountPagination } from '@/types/ad-account';
 import { getMockAdAccounts, getMockHistory, setMockAdAccounts } from '@/data/mock-ad-accounts';
+import { matchesFilter } from '@/lib/utils';
 
 function applyFilters(accounts: AdAccount[], filters: AdAccountFilters) {
   return accounts.filter((a) => {
@@ -8,13 +9,13 @@ function applyFilters(accounts: AdAccount[], filters: AdAccountFilters) {
       const s = filters.search.toLowerCase();
       if (!a.name.toLowerCase().includes(s) && !a.accountId.includes(s)) return false;
     }
-    if (filters.accountStatus && a.accountStatus !== filters.accountStatus) return false;
-    if (filters.usageStatus && a.usageStatus !== filters.usageStatus) return false;
+    if (!matchesFilter(a.accountStatus, filters.accountStatus)) return false;
+    if (!matchesFilter(a.usageStatus, filters.usageStatus)) return false;
     if (filters.balanceRemoved === 'true' && !a.balanceRemoved) return false;
-    if (filters.managerId && a.managerId !== filters.managerId) return false;
-    if (filters.niche && a.niche !== filters.niche) return false;
-    if (filters.supplierId && a.supplierId !== filters.supplierId) return false;
-    if (filters.paymentType && a.paymentType !== filters.paymentType) return false;
+    if (!matchesFilter(a.managerId, filters.managerId)) return false;
+    if (!matchesFilter(a.niche, filters.niche)) return false;
+    if (!matchesFilter(a.supplierId, filters.supplierId)) return false;
+    if (!matchesFilter(a.paymentType, filters.paymentType)) return false;
     return true;
   });
 }

@@ -1,15 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Request, RequestFilters, RequestComment, RequestStatusChange, RequestStatus } from '@/types/request';
 import { getMockRequests, setMockRequests } from '@/data/mock-requests';
+import { matchesFilter } from '@/lib/utils';
 
 function applyFilters(requests: Request[], filters: RequestFilters) {
   return requests.filter((r) => {
     if (filters.search && !r.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
-    if (filters.type && r.type !== filters.type) return false;
-    if (filters.status && r.status !== filters.status) return false;
-    if (filters.priority && r.priority !== filters.priority) return false;
-    if (filters.requesterId && r.requesterId !== filters.requesterId) return false;
-    if (filters.assigneeId && r.assigneeId !== filters.assigneeId) return false;
+    if (!matchesFilter(r.type, filters.type)) return false;
+    if (!matchesFilter(r.status, filters.status)) return false;
+    if (!matchesFilter(r.priority, filters.priority)) return false;
+    if (!matchesFilter(r.requesterId, filters.requesterId)) return false;
+    if (!matchesFilter(r.assigneeId, filters.assigneeId)) return false;
     return true;
   });
 }

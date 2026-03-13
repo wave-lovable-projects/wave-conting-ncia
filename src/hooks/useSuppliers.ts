@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Supplier, Complaint, SupplierFilters, ComplaintFilters, ComplaintComment } from '@/types/supplier';
 import { getMockSuppliers, setMockSuppliers, getMockComplaints, setMockComplaints } from '@/data/mock-suppliers';
+import { matchesFilter } from '@/lib/utils';
 
 function applySupplierFilters(suppliers: Supplier[], filters: SupplierFilters) {
   return suppliers.filter((s) => {
     if (filters.search && !s.name.toLowerCase().includes(filters.search.toLowerCase())) return false;
-    if (filters.status && s.status !== filters.status) return false;
+    if (!matchesFilter(s.status, filters.status)) return false;
     return true;
   });
 }
 
 function applyComplaintFilters(complaints: Complaint[], filters: ComplaintFilters) {
   return complaints.filter((c) => {
-    if (filters.supplierId && c.supplierId !== filters.supplierId) return false;
-    if (filters.status && c.status !== filters.status) return false;
-    if (filters.priority && c.priority !== filters.priority) return false;
+    if (!matchesFilter(c.supplierId, filters.supplierId)) return false;
+    if (!matchesFilter(c.status, filters.status)) return false;
+    if (!matchesFilter(c.priority, filters.priority)) return false;
     return true;
   });
 }

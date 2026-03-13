@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { User, UserFilters } from '@/types/user';
 import { getMockUsers, setMockUsers } from '@/data/mock-users';
+import { matchesFilter } from '@/lib/utils';
 
 function applyFilters(users: User[], filters: UserFilters) {
   return users.filter((u) => {
@@ -8,12 +9,9 @@ function applyFilters(users: User[], filters: UserFilters) {
       const s = filters.search.toLowerCase();
       if (!u.name.toLowerCase().includes(s) && !u.email.toLowerCase().includes(s)) return false;
     }
-    if (filters.role && u.role !== filters.role) return false;
-    if (filters.squadId && u.squadId !== filters.squadId) return false;
-    if (filters.isActive !== undefined && filters.isActive !== '') {
-      if (filters.isActive === 'true' && !u.isActive) return false;
-      if (filters.isActive === 'false' && u.isActive) return false;
-    }
+    if (!matchesFilter(u.role, filters.role)) return false;
+    if (!matchesFilter(u.squadId, filters.squadId)) return false;
+    if (filters.isActive && !matchesFilter(String(u.isActive), filters.isActive)) return false;
     return true;
   });
 }

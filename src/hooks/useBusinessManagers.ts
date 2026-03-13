@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMockBMs, setMockBMs } from '@/data/mock-business-managers';
 import type { BusinessManager, BMFilters, BMPagination } from '@/types/business-manager';
+import { matchesFilter } from '@/lib/utils';
 
 function filterAndPaginate(filters: BMFilters, pagination: BMPagination) {
   let items = getMockBMs();
@@ -8,8 +9,8 @@ function filterAndPaginate(filters: BMFilters, pagination: BMPagination) {
     const s = filters.search.toLowerCase();
     items = items.filter(i => i.name.toLowerCase().includes(s) || i.bmId.includes(s));
   }
-  if (filters.status) items = items.filter(i => i.status === filters.status);
-  if (filters.supplierId) items = items.filter(i => i.supplierId === filters.supplierId);
+  if (!matchesFilter(undefined, undefined)) { /* type guard */ }
+  items = items.filter(i => matchesFilter(i.status, filters.status) && matchesFilter(i.supplierId, filters.supplierId));
   const total = items.length;
   const totalPages = Math.max(1, Math.ceil(total / pagination.pageSize));
   const start = (pagination.page - 1) * pagination.pageSize;

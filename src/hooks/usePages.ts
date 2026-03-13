@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getMockPages, setMockPages } from '@/data/mock-pages';
 import type { FacebookPage, PageFilters, PagePagination } from '@/types/page';
+import { matchesFilter } from '@/lib/utils';
 
 function filterAndPaginate(filters: PageFilters, pagination: PagePagination) {
   let items = getMockPages();
@@ -8,9 +9,7 @@ function filterAndPaginate(filters: PageFilters, pagination: PagePagination) {
     const s = filters.search.toLowerCase();
     items = items.filter(i => i.name.toLowerCase().includes(s) || i.pageId.includes(s));
   }
-  if (filters.status) items = items.filter(i => i.status === filters.status);
-  if (filters.supplierId) items = items.filter(i => i.supplierId === filters.supplierId);
-  if (filters.bmId) items = items.filter(i => i.bmId === filters.bmId);
+  items = items.filter(i => matchesFilter(i.status, filters.status) && matchesFilter(i.supplierId, filters.supplierId) && matchesFilter(i.bmId, filters.bmId));
   const total = items.length;
   const totalPages = Math.max(1, Math.ceil(total / pagination.pageSize));
   const start = (pagination.page - 1) * pagination.pageSize;

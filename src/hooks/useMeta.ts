@@ -92,7 +92,10 @@ export function useMetaCampaigns(filters: MetaCampaignFilters) {
     queryFn: async () => {
       await delay();
       let list = [...mockMetaCampaigns];
-      if (filters.accountId) list = list.filter((c) => c.adAccountId === filters.accountId);
+      if (filters.accountId) {
+        const ids = filters.accountId.split(',');
+        list = list.filter((c) => ids.includes(c.adAccountId));
+      }
       if (filters.status) list = list.filter((c) => c.status === filters.status);
       if (filters.search) {
         const s = filters.search.toLowerCase();
