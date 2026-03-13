@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Search, X } from 'lucide-react';
+import { Search } from 'lucide-react';
+import { UnifiedFilter } from '@/components/shared/UnifiedFilter';
+import type { FilterCategory } from '@/components/shared/UnifiedFilter';
 import type { BMFilters } from '@/types/business-manager';
 
 const mockSuppliers = [
@@ -18,33 +19,42 @@ interface BMFiltersProps {
   onClear: () => void;
 }
 
+const FILTER_KEYS = ['status', 'supplierId'] as const;
+
+const categories: FilterCategory[] = [
+  { key: 'status', label: 'Status', options: [
+    { value: 'ACTIVE', label: 'Ativa' },
+    { value: 'DISABLED', label: 'Desativada' },
+    { value: 'BLOCKED', label: 'Bloqueada' },
+  ]},
+  { key: 'supplierId', label: 'Fornecedor', options: mockSuppliers.map((s) => ({ value: s.id, label: s.name })) },
+];
+
 export function BMFiltersBar({ filters, searchValue, onSearchChange, onFilterChange, onClear }: BMFiltersProps) {
-  const hasFilters = filters.status || filters.supplierId || searchValue;
+  const values = useMemo(() => {
+    const v: Record<string, string[]> = {};
+    for (const key of FILTER_KEYS) {
+      const val = filters[key];
+      if (val) v[key] = val.split(',');
+    }
+    return v;
+  }, [filters]);
+
+  const handleChange = (vals: Record<string, string[]>) => {
+    const partial: Partial<BMFilters> = {};
+    for (const key of FILTER_KEYS) {
+      partial[key] = vals[key]?.length ? vals[key].join(',') : undefined;
+    }
+    onFilterChange(partial);
+  };
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div className="relative flex-1 min-w-[200px] max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Buscar por nome ou BM ID…" value={searchValue} onChange={e => onSearchChange(e.target.value)} className="pl-9" />
+        <Input placeholder="Buscar por nome ou BM ID…" value={searchValue} onChange={(e) => onSearchChange(e.target.value)} className="pl-9" />
       </div>
-      <Select value={filters.status || 'ALL'} onValueChange={v => onFilterChange({ status: v === 'ALL' ? undefined : v })}>
-        <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ALL">Todos</SelectItem>
-          <SelectItem value="ACTIVE">Ativa</SelectItem>
-          <SelectItem value="DISABLED">Desativada</SelectItem>
-          <SelectItem value="BLOCKED">Bloqueada</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select value={filters.supplierId || 'ALL'} onValueChange={v => onFilterChange({ supplierId: v === 'ALL' ? undefined : v })}>
-        <SelectTrigger className="w-[180px]"><SelectValue placeholder="Fornecedor" /></SelectTrigger>
-        <SelectContent>
-          <SelectItem value="ALL">Todos</SelectItem>
-          {mockSuppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-        </SelectContent>
-      </Select>
-      {hasFilters && (
-        <Button variant="ghost" size="sm" onClick={onClear}><X className="h-4 w-4 mr-1" /> Limpar</Button>
-      )}
+      <UnifiedFilter categories={categories} values={values} onChange={handleChange} />
     </div>
   );
 }
