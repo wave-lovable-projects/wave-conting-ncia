@@ -3,7 +3,7 @@ import { Pencil, Trash2, X } from 'lucide-react';
 
 interface BulkActionsBarProps {
   count: number;
-  onBulkEdit: () => void;
+  onBulkEdit?: () => void;
   onBulkDelete: () => void;
   onClear: () => void;
 }
