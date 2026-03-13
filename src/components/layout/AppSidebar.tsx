@@ -9,7 +9,7 @@ import {
   Users,
   Search,
   Activity,
-  Lightbulb,
+  
   Zap,
   PanelLeftClose,
   PanelLeft,
@@ -65,7 +65,7 @@ const gestaoItems: NavItem[] = [
 const outrosItems: NavItem[] = [
   { title: 'Diagnóstico', url: '/diagnostico', icon: Search },
   { title: 'Log de Atividades', url: '/atividades', icon: Activity },
-  { title: 'Sugestões', url: '/sugestoes', icon: Lightbulb },
+  
 ];
 
 const metaItems: NavItem[] = [
