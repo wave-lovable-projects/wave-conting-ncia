@@ -21,6 +21,8 @@ import Sugestoes from "@/pages/Sugestoes";
 import Usuarios from "@/pages/Usuarios";
 import Atividades from "@/pages/Atividades";
 import MetaDashboard from "@/pages/MetaDashboard";
+import MetaCampaigns from "@/pages/MetaCampaigns";
+import MetaCallback from "@/pages/MetaCallback";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -53,6 +55,8 @@ const App = () => (
               <Route path="/usuarios" element={<Usuarios />} />
               <Route path="/atividades" element={<Atividades />} />
               <Route path="/meta" element={<MetaDashboard />} />
+              <Route path="/meta/campanhas" element={<MetaCampaigns />} />
+              <Route path="/meta/callback" element={<MetaCallback />} />
             </Route>
           </Route>
 

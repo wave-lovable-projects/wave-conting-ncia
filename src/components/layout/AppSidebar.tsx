@@ -66,7 +66,11 @@ const outrosItems: NavItem[] = [
   { title: 'Diagnóstico', url: '/diagnostico', icon: Search },
   { title: 'Log de Atividades', url: '/atividades', icon: Activity },
   { title: 'Sugestões', url: '/sugestoes', icon: Lightbulb },
-  { title: 'Meta API', url: '/meta', icon: Zap },
+];
+
+const metaItems: NavItem[] = [
+  { title: 'Dashboard', url: '/meta', icon: Zap },
+  { title: 'Campanhas', url: '/meta/campanhas', icon: CreditCard },
 ];
 
 function SidebarNavSection({
@@ -174,6 +178,7 @@ export function AppSidebar() {
         <SidebarNavSection label="Contingência" items={contingenciaItems} collapsed={collapsed} userRole={user?.role} />
         <SidebarNavSection label="Gestão" items={gestaoItems} collapsed={collapsed} userRole={user?.role} />
         <SidebarNavSection label="Outros" items={outrosItems} collapsed={collapsed} userRole={user?.role} />
+        <SidebarNavSection label="Meta" items={metaItems} collapsed={collapsed} userRole={user?.role} />
       </SidebarContent>
 
       <SidebarFooter />

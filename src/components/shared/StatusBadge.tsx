@@ -14,6 +14,9 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   DONE: { label: 'Concluída', className: 'bg-success/15 text-success border-success/30' },
   REJECTED: { label: 'Rejeitada', className: 'bg-destructive/15 text-destructive border-destructive/30' },
   ANALYZING: { label: 'Analisando', className: 'bg-accent-purple/15 text-accent-purple border-accent-purple/30' },
+  PAUSED: { label: 'Pausada', className: 'bg-warning/15 text-warning border-warning/30' },
+  ARCHIVED: { label: 'Arquivada', className: 'bg-muted text-muted-foreground border-border' },
+  DELETED: { label: 'Excluída', className: 'bg-destructive/15 text-destructive border-destructive/30 line-through' },
 };
 
 interface StatusBadgeProps {
