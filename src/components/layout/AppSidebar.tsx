@@ -178,6 +178,7 @@ export function AppSidebar() {
         <SidebarNavSection label="Contingência" items={contingenciaItems} collapsed={collapsed} userRole={user?.role} />
         <SidebarNavSection label="Gestão" items={gestaoItems} collapsed={collapsed} userRole={user?.role} />
         <SidebarNavSection label="Outros" items={outrosItems} collapsed={collapsed} userRole={user?.role} />
+        <SidebarNavSection label="Meta" items={metaItems} collapsed={collapsed} userRole={user?.role} />
       </SidebarContent>
 
       <SidebarFooter />
