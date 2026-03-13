@@ -18,8 +18,10 @@ const FILTER_KEYS = ['accountStatus', 'managerId', 'supplierId', 'niche', 'squad
 
 const categories: FilterCategory[] = [
   { key: 'accountStatus', label: 'Status', options: [
+    { value: 'WARMING', label: 'Aquecendo' },
     { value: 'ACTIVE', label: 'Ativa' },
-    { value: 'DISABLED', label: 'Desativada' },
+    { value: 'ADVERTISING', label: 'Anunciando' },
+    { value: 'DISABLED', label: 'Desabilitada' },
     { value: 'ROLLBACK', label: 'Rollback' },
   ]},
   { key: 'managerId', label: 'Gestor', options: mockManagers.map((m) => ({ value: m.id, label: m.name })) },
@@ -27,10 +29,8 @@ const categories: FilterCategory[] = [
   { key: 'niche', label: 'Nicho', options: mockNiches.map((n) => ({ value: n, label: n })) },
   { key: 'squadId', label: 'Squad', options: mockSquads.map((s) => ({ value: s.id, label: s.name })) },
   { key: 'paymentType', label: 'Pagamento', options: [
-    { value: 'CREDIT', label: 'Crédito' },
-    { value: 'DEBIT', label: 'Débito' },
-    { value: 'BOLETO', label: 'Boleto' },
-    { value: 'PIX', label: 'Pix' },
+    { value: 'CARD', label: 'Cartão' },
+    { value: 'AGENCY', label: 'Agência' },
   ]},
 ];
 

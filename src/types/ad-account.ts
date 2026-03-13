@@ -1,7 +1,8 @@
-export type AccountStatus = 'ACTIVE' | 'DISABLED' | 'ROLLBACK';
-export type BmStatus = 'ACTIVE' | 'DISABLED' | 'BLOCKED';
+export type AccountStatus = 'WARMING' | 'ACTIVE' | 'ADVERTISING' | 'DISABLED' | 'ROLLBACK';
+export type BmStatus = 'ACTIVE' | 'DISABLED';
 export type UsageStatus = 'IN_USE' | 'STANDBY' | 'RETIRED';
-export type PaymentType = 'CREDIT' | 'DEBIT' | 'BOLETO' | 'PIX';
+export type PaymentType = 'CARD' | 'AGENCY';
+export type Currency = 'USD' | 'BRL';
 
 export interface AdAccount {
   id: string;
@@ -19,9 +20,9 @@ export interface AdAccount {
   managerName?: string;
   accountStatus: AccountStatus;
   bmStatus?: BmStatus;
-  balanceRemoved: boolean;
+  balance: number;
+  currency: Currency;
   paymentType?: PaymentType;
-  bank?: string;
   cardLast4?: string;
   usageStatus: UsageStatus;
   createdAt: string;
@@ -46,7 +47,6 @@ export interface AdAccountFilters {
   paymentType?: string;
   search?: string;
   usageStatus?: string;
-  balanceRemoved?: string;
 }
 
 export interface AdAccountPagination {

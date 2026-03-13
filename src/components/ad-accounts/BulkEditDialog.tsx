@@ -49,7 +49,10 @@ export function BulkEditDialog({ open, onOpenChange, selectedIds, onDone }: Prop
   };
 
   const fieldConfig = [
-    { key: 'accountStatus', label: 'Status da Conta', options: [{ v: 'ACTIVE', l: 'Ativa' }, { v: 'DISABLED', l: 'Desativada' }, { v: 'ROLLBACK', l: 'Rollback' }] },
+    { key: 'accountStatus', label: 'Status da Conta', options: [
+      { v: 'WARMING', l: 'Aquecendo' }, { v: 'ACTIVE', l: 'Ativa' }, { v: 'ADVERTISING', l: 'Anunciando' },
+      { v: 'DISABLED', l: 'Desabilitada' }, { v: 'ROLLBACK', l: 'Rollback' },
+    ]},
     { key: 'usageStatus', label: 'Status de Uso', options: [{ v: 'IN_USE', l: 'Em Uso' }, { v: 'STANDBY', l: 'Standby' }, { v: 'RETIRED', l: 'Aposentada' }] },
     { key: 'managerId', label: 'Gestor', options: mockManagers.map(m => ({ v: m.id, l: m.name })) },
     { key: 'supplierId', label: 'Fornecedor', options: mockSuppliers.map(s => ({ v: s.id, l: s.name })) },

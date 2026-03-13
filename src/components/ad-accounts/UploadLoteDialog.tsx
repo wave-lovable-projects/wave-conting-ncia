@@ -10,7 +10,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
-const CSV_HEADERS = ['name', 'accountId', 'niche', 'product', 'accountStatus', 'usageStatus', 'paymentType', 'bank', 'cardLast4'];
+const CSV_HEADERS = ['name', 'accountId', 'niche', 'product', 'accountStatus', 'usageStatus', 'paymentType', 'cardLast4'];
 
 export function UploadLoteDialog({ open, onOpenChange }: Props) {
   const [rows, setRows] = useState<string[][]>([]);
@@ -47,7 +47,7 @@ export function UploadLoteDialog({ open, onOpenChange }: Props) {
   };
 
   const downloadTemplate = () => {
-    const csv = CSV_HEADERS.join(',') + '\nConta Exemplo,1234567890,Ecommerce,Produto X,ACTIVE,IN_USE,CREDIT,Nubank,1234';
+    const csv = CSV_HEADERS.join(',') + '\nConta Exemplo,1234567890,Ecommerce,Produto X,ACTIVE,IN_USE,CARD,1234';
     const blob = new Blob([csv], { type: 'text/csv' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);

@@ -2,7 +2,9 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 const statusConfig: Record<string, { label: string; className: string }> = {
+  WARMING: { label: 'Aquecendo', className: 'bg-info/15 text-info border-info/30' },
   ACTIVE: { label: 'Ativa', className: 'bg-success/15 text-success border-success/30' },
+  ADVERTISING: { label: 'Anunciando', className: 'bg-accent-purple/15 text-accent-purple border-accent-purple/30' },
   DISABLED: { label: 'Desativada', className: 'bg-destructive/15 text-destructive border-destructive/30' },
   ROLLBACK: { label: 'Rollback', className: 'bg-warning/15 text-warning border-warning/30' },
   BLOCKED: { label: 'Bloqueada', className: 'bg-destructive/20 text-destructive border-destructive/40' },

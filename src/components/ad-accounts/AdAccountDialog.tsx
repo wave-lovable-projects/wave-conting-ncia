@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,11 +23,11 @@ const schema = z.object({
   product: z.string().optional(),
   vsl: z.string().optional(),
   managerId: z.string().optional(),
-  accountStatus: z.enum(['ACTIVE', 'DISABLED', 'ROLLBACK']),
-  bmStatus: z.enum(['ACTIVE', 'DISABLED', 'BLOCKED']).optional(),
-  balanceRemoved: z.boolean(),
-  paymentType: z.enum(['CREDIT', 'DEBIT', 'BOLETO', 'PIX']).optional(),
-  bank: z.string().optional(),
+  accountStatus: z.enum(['WARMING', 'ACTIVE', 'ADVERTISING', 'DISABLED', 'ROLLBACK']),
+  bmStatus: z.enum(['ACTIVE', 'DISABLED']).optional(),
+  balance: z.number().min(0, 'Saldo deve ser positivo'),
+  currency: z.enum(['USD', 'BRL']),
+  paymentType: z.enum(['CARD', 'AGENCY']).optional(),
   cardLast4: z.string().max(4).optional(),
   usageStatus: z.enum(['IN_USE', 'STANDBY', 'RETIRED']),
 });
@@ -55,7 +54,7 @@ export function AdAccountDialog({ open, onOpenChange, account }: Props) {
   const { register, control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      name: '', accountId: '', accountStatus: 'ACTIVE', balanceRemoved: false, usageStatus: 'STANDBY',
+      name: '', accountId: '', accountStatus: 'ACTIVE', balance: 0, currency: 'BRL', usageStatus: 'STANDBY',
     },
   });
 
@@ -73,14 +72,14 @@ export function AdAccountDialog({ open, onOpenChange, account }: Props) {
         managerId: account.managerId || '',
         accountStatus: account.accountStatus,
         bmStatus: account.bmStatus,
-        balanceRemoved: account.balanceRemoved,
+        balance: account.balance,
+        currency: account.currency,
         paymentType: account.paymentType,
-        bank: account.bank || '',
         cardLast4: account.cardLast4 || '',
         usageStatus: account.usageStatus,
       });
     } else if (open) {
-      reset({ name: '', accountId: '', accountStatus: 'ACTIVE', balanceRemoved: false, usageStatus: 'STANDBY' });
+      reset({ name: '', accountId: '', accountStatus: 'ACTIVE', balance: 0, currency: 'BRL', usageStatus: 'STANDBY' });
     }
   }, [open, account, reset]);
 
@@ -187,8 +186,10 @@ export function AdAccountDialog({ open, onOpenChange, account }: Props) {
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="WARMING">Aquecendo</SelectItem>
                       <SelectItem value="ACTIVE">Ativa</SelectItem>
-                      <SelectItem value="DISABLED">Desativada</SelectItem>
+                      <SelectItem value="ADVERTISING">Anunciando</SelectItem>
+                      <SelectItem value="DISABLED">Desabilitada</SelectItem>
                       <SelectItem value="ROLLBACK">Rollback</SelectItem>
                     </SelectContent>
                   </Select>
@@ -202,8 +203,7 @@ export function AdAccountDialog({ open, onOpenChange, account }: Props) {
                     <SelectContent>
                       <SelectItem value="__none__">Nenhum</SelectItem>
                       <SelectItem value="ACTIVE">Ativa</SelectItem>
-                      <SelectItem value="DISABLED">Desativada</SelectItem>
-                      <SelectItem value="BLOCKED">Bloqueada</SelectItem>
+                      <SelectItem value="DISABLED">Desabilitada</SelectItem>
                     </SelectContent>
                   </Select>
                 )} />
@@ -217,10 +217,8 @@ export function AdAccountDialog({ open, onOpenChange, account }: Props) {
                     <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="__none__">Nenhum</SelectItem>
-                      <SelectItem value="CREDIT">Crédito</SelectItem>
-                      <SelectItem value="DEBIT">Débito</SelectItem>
-                      <SelectItem value="BOLETO">Boleto</SelectItem>
-                      <SelectItem value="PIX">Pix</SelectItem>
+                      <SelectItem value="CARD">Cartão</SelectItem>
+                      <SelectItem value="AGENCY">Agência</SelectItem>
                     </SelectContent>
                   </Select>
                 )} />
@@ -241,19 +239,25 @@ export function AdAccountDialog({ open, onOpenChange, account }: Props) {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>Banco</Label>
-                <Input {...register('bank')} />
+                <Label>Saldo</Label>
+                <div className="flex gap-2">
+                  <Controller name="currency" control={control} render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-20"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BRL">R$</SelectItem>
+                        <SelectItem value="USD">$</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )} />
+                  <Input type="number" step="0.01" min="0" {...register('balance', { valueAsNumber: true })} className="flex-1" />
+                </div>
+                {errors.balance && <p className="text-xs text-destructive">{errors.balance.message}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Final do Cartão</Label>
                 <Input {...register('cardLast4')} maxLength={4} placeholder="0000" />
               </div>
-            </div>
-            <div className="flex items-center gap-3 pt-2">
-              <Controller name="balanceRemoved" control={control} render={({ field }) => (
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
-              )} />
-              <Label>Saldo Removido</Label>
             </div>
           </form>
         </ScrollArea>

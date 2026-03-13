@@ -1,7 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { CellWithHistory } from '@/components/shared/CellWithHistory';
@@ -10,7 +9,12 @@ import { MoreHorizontal, Copy, Pencil, AlertTriangle, Link2, Trash2, ArrowUpDown
 import type { AdAccount, AdAccountPagination } from '@/types/ad-account';
 import { toast } from '@/hooks/use-toast';
 
-const paymentLabels: Record<string, string> = { CREDIT: 'Crédito', DEBIT: 'Débito', BOLETO: 'Boleto', PIX: 'Pix' };
+const paymentLabels: Record<string, string> = { CARD: 'Cartão', AGENCY: 'Agência' };
+
+const formatBalance = (balance: number, currency: 'USD' | 'BRL') => {
+  const symbol = currency === 'USD' ? '$' : 'R$';
+  return `${symbol} ${balance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
 
 interface Props {
   data: AdAccount[];
@@ -79,19 +83,36 @@ export function AdAccountsTable({
               <TableHead>Status BM</TableHead>
               <TableHead>Saldo</TableHead>
               <TableHead>Pagamento</TableHead>
-              <TableHead>Banco</TableHead>
               <TableHead>Cartão</TableHead>
               <TableHead>Uso</TableHead>
-              <TableHead className="w-12 text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.length === 0 ? (
-              <TableRow><TableCell colSpan={16} className="text-center py-12 text-muted-foreground">Nenhuma conta encontrada</TableCell></TableRow>
+              <TableRow><TableCell colSpan={14} className="text-center py-12 text-muted-foreground">Nenhuma conta encontrada</TableCell></TableRow>
             ) : data.map((a) => (
-              <TableRow key={a.id} className={selectedIds.has(a.id) ? 'bg-surface-2' : ''}>
+              <TableRow key={a.id} className={`group/row ${selectedIds.has(a.id) ? 'bg-surface-2' : ''}`}>
                 <TableCell><Checkbox checked={selectedIds.has(a.id)} onCheckedChange={() => toggle(a.id)} /></TableCell>
-                <TableCell className="font-medium text-foreground whitespace-nowrap">{a.name}</TableCell>
+                <TableCell className="font-medium text-foreground whitespace-nowrap">
+                  <div className="flex items-center gap-1">
+                    <span>{a.name}</span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        <DropdownMenuItem onClick={() => onEdit(a)}><Pencil className="h-4 w-4 mr-2" /> Editar</DropdownMenuItem>
+                        <DropdownMenuItem><AlertTriangle className="h-4 w-4 mr-2" /> Registrar Incidente</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onViewConnections(a)}><Link2 className="h-4 w-4 mr-2" /> Ver Conexões</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => copyId(a.accountId)}><Copy className="h-4 w-4 mr-2" /> Copiar ID</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onDelete(a)}><Trash2 className="h-4 w-4 mr-2" /> Excluir</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <span className="text-muted-foreground font-mono text-xs">{a.accountId}</span>
@@ -117,30 +138,10 @@ export function AdAccountsTable({
                     </CellWithHistory>
                   ) : <span className="text-muted-foreground">—</span>}
                 </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className={a.balanceRemoved ? 'bg-warning/15 text-warning border-warning/30' : 'bg-surface-2 text-muted-foreground border-border'}>
-                    {a.balanceRemoved ? 'Sim' : 'Não'}
-                  </Badge>
-                </TableCell>
+                <TableCell className="text-sm font-medium">{formatBalance(a.balance, a.currency)}</TableCell>
                 <TableCell className="text-sm">{a.paymentType ? paymentLabels[a.paymentType] || a.paymentType : '—'}</TableCell>
-                <TableCell className="text-sm">{a.bank || '—'}</TableCell>
                 <TableCell className="text-sm font-mono">{a.cardLast4 ? `••${a.cardLast4}` : '—'}</TableCell>
                 <TableCell><StatusBadge status={a.usageStatus} /></TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(a)}><Pencil className="h-4 w-4 mr-2" /> Editar</DropdownMenuItem>
-                      <DropdownMenuItem><AlertTriangle className="h-4 w-4 mr-2" /> Registrar Incidente</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onViewConnections(a)}><Link2 className="h-4 w-4 mr-2" /> Ver Conexões</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => copyId(a.accountId)}><Copy className="h-4 w-4 mr-2" /> Copiar ID</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onDelete(a)}><Trash2 className="h-4 w-4 mr-2" /> Excluir</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>
