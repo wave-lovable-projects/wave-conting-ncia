@@ -99,16 +99,12 @@ export function ConnectionGraph() {
     }));
   }, [graphData]);
 
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   // Keep in sync with data
-  useMemo(() => {
-    if (initialNodes.length) onNodesChange(initialNodes.map(n => ({ type: 'reset' as const, item: n })));
-  }, [initialNodes]);
-  useMemo(() => {
-    if (initialEdges.length) onEdgesChange(initialEdges.map(e => ({ type: 'reset' as const, item: e })));
-  }, [initialEdges]);
+  useMemo(() => { setNodes(initialNodes); }, [initialNodes]);
+  useMemo(() => { setEdges(initialEdges); }, [initialEdges]);
 
   const onNodeClick = useCallback((_: any, node: Node) => setSelectedNodeId(node.id), []);
 
