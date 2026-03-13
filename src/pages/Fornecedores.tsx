@@ -89,11 +89,11 @@ export default function Fornecedores() {
       <ComplaintDetailSheet complaintId={selectedComplaintId} onClose={() => setSelectedComplaintId(null)} />
       <ConfirmDialog
         open={!!deleteId}
-        onOpenChange={(v) => !v && setDeleteId(null)}
         title="Excluir Fornecedor"
         description="Tem certeza que deseja excluir este fornecedor?"
         onConfirm={handleDelete}
-        loading={deleteMutation.isPending}
+        onCancel={() => setDeleteId(null)}
+        variant="danger"
       />
     </div>
   );

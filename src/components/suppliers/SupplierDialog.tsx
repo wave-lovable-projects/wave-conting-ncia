@@ -26,7 +26,7 @@ interface SupplierDialogProps {
 export function SupplierDialog({ open, onOpenChange, supplier }: SupplierDialogProps) {
   const isEditing = !!supplier;
   const [name, setName] = useState(supplier?.name ?? '');
-  const [status, setStatus] = useState(supplier?.status ?? 'ACTIVE');
+  const [status, setStatus] = useState<string>(supplier?.status ?? 'ACTIVE');
   const [types, setTypes] = useState<SupplierAssetType[]>(supplier?.types ?? []);
 
   const createMutation = useCreateSupplier();
