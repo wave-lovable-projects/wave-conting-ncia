@@ -17,7 +17,7 @@ import Pixels from "@/pages/Pixels";
 import Fornecedores from "@/pages/Fornecedores";
 import Solicitacoes from "@/pages/Solicitacoes";
 import Diagnostico from "@/pages/Diagnostico";
-import Sugestoes from "@/pages/Sugestoes";
+
 import Usuarios from "@/pages/Usuarios";
 import Atividades from "@/pages/Atividades";
 import MetaDashboard from "@/pages/MetaDashboard";
