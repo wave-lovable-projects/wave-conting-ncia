@@ -38,7 +38,7 @@ export default function Fornecedores() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Fornecedores" icon={Package} />
+      <PageHeader title="Fornecedores" />
 
       <Tabs defaultValue="suppliers">
         <TabsList>
