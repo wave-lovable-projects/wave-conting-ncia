@@ -39,7 +39,7 @@ export default function Atividades() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Log de Atividades" subtitle="Histórico de todas as ações realizadas no sistema" />
+      <PageHeader title="Log de Atividades" description="Histórico de todas as ações realizadas no sistema" />
 
       {/* Summary Panel */}
       <Collapsible open={summaryOpen} onOpenChange={setSummaryOpen}>

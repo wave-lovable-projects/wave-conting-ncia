@@ -14,7 +14,7 @@ export default function Sugestoes() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Sugestões" subtitle="Ideias e melhorias propostas pela equipe" />
+      <PageHeader title="Sugestões" description="Ideias e melhorias propostas pela equipe" />
 
       <div className="flex items-center gap-3 flex-wrap">
         <Select value={filters.status || 'ALL'} onValueChange={v => setFilters(f => ({ ...f, status: v === 'ALL' ? undefined : v }))}>

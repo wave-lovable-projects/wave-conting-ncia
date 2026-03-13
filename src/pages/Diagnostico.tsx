@@ -11,7 +11,7 @@ export default function Diagnostico() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Diagnóstico" subtitle="Grafo de conexões, incidentes e correlações entre ativos" />
+      <PageHeader title="Diagnóstico" description="Grafo de conexões, incidentes e correlações entre ativos" />
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
