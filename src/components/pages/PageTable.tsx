@@ -54,13 +54,30 @@ export function PageTable({ data, total, totalPages, pagination, onPaginationCha
               <TableHead>Dt. Uso</TableHead>
               <TableHead>Gestor</TableHead>
               <TableHead>Notas</TableHead>
-              <TableHead className="w-[60px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map(p => (
-              <TableRow key={p.id}>
-                <TableCell className="font-medium text-foreground">{p.name}</TableCell>
+              <TableRow key={p.id} className="group/row">
+                <TableCell className="font-medium text-foreground">
+                  <div className="flex items-center gap-1">
+                    <span>{p.name}</span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        <DropdownMenuItem onClick={() => onEdit(p)}><Pencil className="h-4 w-4 mr-2" /> Editar</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onViewConnections(p)}><Link2 className="h-4 w-4 mr-2" /> Ver Conexões</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => copyId(p.pageId)}><Copy className="h-4 w-4 mr-2" /> Copiar ID</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive" onClick={() => onDelete(p)}><Trash2 className="h-4 w-4 mr-2" /> Excluir</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <span className="text-sm font-mono text-muted-foreground">{p.pageId}</span>
@@ -76,18 +93,6 @@ export function PageTable({ data, total, totalPages, pagination, onPaginationCha
                 <TableCell className="text-sm text-muted-foreground">{p.usedAt ? format(new Date(p.usedAt), 'dd/MM/yyyy') : '—'}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{p.managerName || '—'}</TableCell>
                 <TableCell className="text-sm text-muted-foreground truncate max-w-[120px]">{p.notes || '—'}</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(p)}><Pencil className="h-4 w-4 mr-2" /> Editar</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onViewConnections(p)}><Link2 className="h-4 w-4 mr-2" /> Ver Conexões</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => copyId(p.pageId)}><Copy className="h-4 w-4 mr-2" /> Copiar ID</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive" onClick={() => onDelete(p)}><Trash2 className="h-4 w-4 mr-2" /> Excluir</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>

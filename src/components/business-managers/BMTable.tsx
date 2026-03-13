@@ -52,13 +52,30 @@ export function BMTable({ data, total, totalPages, pagination, onPaginationChang
               <TableHead>Gestores</TableHead>
               <TableHead>Dt. Recebimento</TableHead>
               <TableHead>Dt. Block</TableHead>
-              <TableHead className="w-[60px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map(bm => (
-              <TableRow key={bm.id}>
-                <TableCell className="font-medium text-foreground">{bm.name}</TableCell>
+              <TableRow key={bm.id} className="group/row">
+                <TableCell className="font-medium text-foreground">
+                  <div className="flex items-center gap-1">
+                    <span>{bm.name}</span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        <DropdownMenuItem onClick={() => onEdit(bm)}><Pencil className="h-4 w-4 mr-2" /> Editar</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onViewConnections(bm)}><Link2 className="h-4 w-4 mr-2" /> Ver Conexões</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => copyId(bm.bmId)}><Copy className="h-4 w-4 mr-2" /> Copiar ID</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive" onClick={() => onDelete(bm)}><Trash2 className="h-4 w-4 mr-2" /> Excluir</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <span className="text-sm font-mono text-muted-foreground">{bm.bmId}</span>
@@ -76,18 +93,6 @@ export function BMTable({ data, total, totalPages, pagination, onPaginationChang
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{bm.receivedAt ? format(new Date(bm.receivedAt), 'dd/MM/yyyy') : '—'}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{bm.blockedAt ? format(new Date(bm.blockedAt), 'dd/MM/yyyy') : '—'}</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(bm)}><Pencil className="h-4 w-4 mr-2" /> Editar</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onViewConnections(bm)}><Link2 className="h-4 w-4 mr-2" /> Ver Conexões</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => copyId(bm.bmId)}><Copy className="h-4 w-4 mr-2" /> Copiar ID</DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive" onClick={() => onDelete(bm)}><Trash2 className="h-4 w-4 mr-2" /> Excluir</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>

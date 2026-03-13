@@ -58,15 +58,32 @@ export function ProfileTable({ data, total, totalPages, pagination, onPagination
               <TableHead>Status</TableHead>
               <TableHead>Dt. Recebimento</TableHead>
               <TableHead>Dt. Desativação</TableHead>
-              <TableHead className="w-[60px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map(p => {
               const showPw = revealedPasswords.has(p.id);
               return (
-                <TableRow key={p.id}>
-                  <TableCell className="font-medium text-foreground">{p.name}</TableCell>
+                <TableRow key={p.id} className="group/row">
+                  <TableCell className="font-medium text-foreground">
+                    <div className="flex items-center gap-1">
+                      <span>{p.name}</span>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          <DropdownMenuItem onClick={() => onEdit(p)}><Pencil className="h-4 w-4 mr-2" /> Editar</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onViewDetails(p)}><ExternalLink className="h-4 w-4 mr-2" /> Ver Detalhes</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => onViewConnections(p)}><Link2 className="h-4 w-4 mr-2" /> Ver Conexões</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-destructive" onClick={() => onDelete(p)}><Trash2 className="h-4 w-4 mr-2" /> Excluir</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <span className="text-sm text-muted-foreground truncate max-w-[140px]">{p.email}</span>
@@ -89,18 +106,6 @@ export function ProfileTable({ data, total, totalPages, pagination, onPagination
                   <TableCell><StatusBadge status={p.status} /></TableCell>
                   <TableCell className="text-sm text-muted-foreground">{p.receivedAt ? format(new Date(p.receivedAt), 'dd/MM/yyyy') : '—'}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{p.deactivatedAt ? format(new Date(p.deactivatedAt), 'dd/MM/yyyy') : '—'}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onEdit(p)}><Pencil className="h-4 w-4 mr-2" /> Editar</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onViewDetails(p)}><ExternalLink className="h-4 w-4 mr-2" /> Ver Detalhes</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onViewConnections(p)}><Link2 className="h-4 w-4 mr-2" /> Ver Conexões</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive" onClick={() => onDelete(p)}><Trash2 className="h-4 w-4 mr-2" /> Excluir</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
                 </TableRow>
               );
             })}

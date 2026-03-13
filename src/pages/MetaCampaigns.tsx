@@ -96,13 +96,12 @@ export default function MetaCampaigns() {
                 <TableHead className="text-right">Spend Hoje</TableHead>
                 <TableHead className="text-right">ROAS</TableHead>
                 <TableHead>Última Sync</TableHead>
-                <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
               {campaigns?.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center text-muted-foreground py-12">
+                  <TableCell colSpan={9} className="text-center text-muted-foreground py-12">
                     Nenhuma campanha encontrada.
                   </TableCell>
                 </TableRow>
@@ -111,9 +110,36 @@ export default function MetaCampaigns() {
                 const spend = getTodaySpend(c.id);
                 const roas = getTodayRoas(c.id);
                 return (
-                  <TableRow key={c.id}>
+                  <TableRow key={c.id} className="group/row">
                     <TableCell className={cn('font-medium', c.status === 'DELETED' && 'line-through text-muted-foreground')}>
-                      {c.name}
+                      <div className="flex items-center gap-1">
+                        <span>{c.name}</span>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start">
+                            {c.status === 'ACTIVE' && (
+                              <DropdownMenuItem onClick={() => setConfirmAction({ type: 'pause', campaign: c })}>
+                                <Pause className="h-4 w-4 mr-2" /> Pausar
+                              </DropdownMenuItem>
+                            )}
+                            {c.status === 'PAUSED' && (
+                              <DropdownMenuItem onClick={() => setConfirmAction({ type: 'activate', campaign: c })}>
+                                <Play className="h-4 w-4 mr-2" /> Ativar
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => setInsightsCampaign(c)}>
+                              <BarChart3 className="h-4 w-4 mr-2" /> Ver Insights
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.open(`https://business.facebook.com/adsmanager/manage/campaigns?act=${c.metaId}`, '_blank')}>
+                              <ExternalLink className="h-4 w-4 mr-2" /> Ver no Facebook
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">{c.accountName}</TableCell>
                     <TableCell><StatusBadge status={c.status} /></TableCell>
@@ -135,33 +161,6 @@ export default function MetaCampaigns() {
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {format(new Date(c.lastSyncAt), 'dd/MM HH:mm', { locale: ptBR })}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {c.status === 'ACTIVE' && (
-                            <DropdownMenuItem onClick={() => setConfirmAction({ type: 'pause', campaign: c })}>
-                              <Pause className="h-4 w-4 mr-2" /> Pausar
-                            </DropdownMenuItem>
-                          )}
-                          {c.status === 'PAUSED' && (
-                            <DropdownMenuItem onClick={() => setConfirmAction({ type: 'activate', campaign: c })}>
-                              <Play className="h-4 w-4 mr-2" /> Ativar
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem onClick={() => setInsightsCampaign(c)}>
-                            <BarChart3 className="h-4 w-4 mr-2" /> Ver Insights
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => window.open(`https://business.facebook.com/adsmanager/manage/campaigns?act=${c.metaId}`, '_blank')}>
-                            <ExternalLink className="h-4 w-4 mr-2" /> Ver no Facebook
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 );
