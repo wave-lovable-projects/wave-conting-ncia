@@ -66,7 +66,11 @@ const outrosItems: NavItem[] = [
   { title: 'Diagnóstico', url: '/diagnostico', icon: Search },
   { title: 'Log de Atividades', url: '/atividades', icon: Activity },
   { title: 'Sugestões', url: '/sugestoes', icon: Lightbulb },
-  { title: 'Meta API', url: '/meta', icon: Zap },
+];
+
+const metaItems: NavItem[] = [
+  { title: 'Dashboard', url: '/meta', icon: Zap },
+  { title: 'Campanhas', url: '/meta/campanhas', icon: CreditCard },
 ];
 
 function SidebarNavSection({
