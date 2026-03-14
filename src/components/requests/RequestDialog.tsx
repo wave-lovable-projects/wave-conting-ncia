@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -93,7 +93,8 @@ const ComboboxField = React.forwardRef<HTMLButtonElement, {
   value: string;
   onChange: (val: string) => void;
   placeholder: string;
-}>(({ options, value, onChange, placeholder }, ref) => {
+  portalContainer?: HTMLElement | null;
+}>(({ options, value, onChange, placeholder, portalContainer }, ref) => {
   const [open, setOpen] = useState(false);
   const selectedLabel = options.find((o) => o.value === value)?.label;
 
@@ -111,13 +112,10 @@ const ComboboxField = React.forwardRef<HTMLButtonElement, {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start" container={portalContainer}>
         <Command>
           <CommandInput placeholder="Buscar..." />
-          <CommandList
-            className="max-h-[200px] overflow-y-auto overscroll-contain"
-            onWheelCapture={(e) => e.stopPropagation()}
-          >
+          <CommandList className="max-h-[200px] overflow-y-auto">
             <CommandEmpty>Nenhum resultado.</CommandEmpty>
             {options.map((opt) => (
               <CommandItem
@@ -141,6 +139,7 @@ ComboboxField.displayName = 'ComboboxField';
 export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
   const createMutation = useCreateRequest();
   const createTemplateMutation = useCreateRequestTemplate();
+  const sheetRef = useRef<HTMLDivElement>(null);
   const bms = getMockBMs();
   const adAccounts = getMockAdAccounts();
 
@@ -259,7 +258,7 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
 
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) form.reset(); onOpenChange(v); }}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent ref={sheetRef} className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{initialTemplate ? 'Nova Solicitação (via Template)' : 'Nova Solicitação'}</SheetTitle>
         </SheetHeader>
@@ -353,7 +352,7 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-foreground">Especificações do Ativo</h3>
                 <Separator />
-                <SpecFields type={watchAssetType} form={form} bms={bms} adAccounts={adAccounts} />
+                <SpecFields type={watchAssetType} form={form} bms={bms} adAccounts={adAccounts} portalContainer={sheetRef.current} />
               </div>
             )}
 
@@ -401,24 +400,25 @@ interface SpecFieldsProps {
   form: ReturnType<typeof useForm<FormValues>>;
   bms: ReturnType<typeof getMockBMs>;
   adAccounts: ReturnType<typeof getMockAdAccounts>;
+  portalContainer?: HTMLElement | null;
 }
 
-function SpecFields({ type, form, bms, adAccounts }: SpecFieldsProps) {
+function SpecFields({ type, form, bms, adAccounts, portalContainer }: SpecFieldsProps) {
   switch (type) {
     case 'CONTA_ANUNCIO':
-      return <SpecContaAnuncio form={form} bms={bms} />;
+      return <SpecContaAnuncio form={form} bms={bms} portalContainer={portalContainer} />;
     case 'PERFIL':
       return <SpecPerfil form={form} />;
     case 'BUSINESS_MANAGER':
-      return <SpecBM form={form} />;
+      return <SpecBM form={form} portalContainer={portalContainer} />;
     case 'SALDO':
-      return <SpecSaldo form={form} adAccounts={adAccounts} />;
+      return <SpecSaldo form={form} adAccounts={adAccounts} portalContainer={portalContainer} />;
     default:
       return null;
   }
 }
 
-function SpecContaAnuncio({ form, bms }: { form: any; bms: any[] }) {
+function SpecContaAnuncio({ form, bms, portalContainer }: { form: any; bms: any[]; portalContainer?: HTMLElement | null }) {
   const bmOptions: ComboboxOption[] = bms.map((bm) => ({
     value: bm.name,
     label: `${bm.name} (${bm.bmId})`,
@@ -463,6 +463,7 @@ function SpecContaAnuncio({ form, bms }: { form: any; bms: any[] }) {
               value={field.value || ''}
               onChange={field.onChange}
               placeholder="Selecionar BM"
+              portalContainer={portalContainer}
             />
           </FormControl>
         </FormItem>
@@ -484,7 +485,7 @@ function SpecPerfil({ form }: { form: any }) {
   );
 }
 
-function SpecBM({ form }: { form: any }) {
+function SpecBM({ form, portalContainer }: { form: any; portalContainer?: HTMLElement | null }) {
   const supplierOptions: ComboboxOption[] = mockSuppliers.map((s) => ({
     value: s.name,
     label: s.name,
@@ -512,6 +513,7 @@ function SpecBM({ form }: { form: any }) {
               value={field.value || ''}
               onChange={field.onChange}
               placeholder="Selecionar fornecedor"
+              portalContainer={portalContainer}
             />
           </FormControl>
         </FormItem>
@@ -520,7 +522,7 @@ function SpecBM({ form }: { form: any }) {
   );
 }
 
-function SpecSaldo({ form, adAccounts }: { form: any; adAccounts: any[] }) {
+function SpecSaldo({ form, adAccounts, portalContainer }: { form: any; adAccounts: any[]; portalContainer?: HTMLElement | null }) {
   const accountOptions: ComboboxOption[] = adAccounts.map((a) => ({
     value: a.name,
     label: `${a.name} (${a.accountId})`,
@@ -537,6 +539,7 @@ function SpecSaldo({ form, adAccounts }: { form: any; adAccounts: any[] }) {
               value={field.value || ''}
               onChange={field.onChange}
               placeholder="Selecionar conta"
+              portalContainer={portalContainer}
             />
           </FormControl>
         </FormItem>
