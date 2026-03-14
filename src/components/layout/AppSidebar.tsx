@@ -149,6 +149,7 @@ export function AppSidebar() {
     return [
       { title: 'Fornecedores', url: '/fornecedores', icon: Package },
       { title: 'Solicitações', url: '/solicitacoes', icon: ClipboardList, badge: badgeCount },
+      { title: 'Dashboard Solic.', url: '/solicitacoes/dashboard', icon: BarChart3 },
       { title: 'Usuários', url: '/usuarios', icon: Users, adminOnly: true },
     ];
   }, [user?.role]);
