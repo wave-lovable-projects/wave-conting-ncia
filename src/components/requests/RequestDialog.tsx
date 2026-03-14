@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -88,27 +88,36 @@ interface ComboboxOption {
   label: string;
 }
 
-function ComboboxField({ options, value, onChange, placeholder }: {
+const ComboboxField = React.forwardRef<HTMLButtonElement, {
   options: ComboboxOption[];
   value: string;
   onChange: (val: string) => void;
   placeholder: string;
-}) {
+}>(({ options, value, onChange, placeholder }, ref) => {
   const [open, setOpen] = useState(false);
   const selectedLabel = options.find((o) => o.value === value)?.label;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between font-normal">
+        <Button
+          ref={ref}
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between font-normal"
+        >
           {selectedLabel || <span className="text-muted-foreground">{placeholder}</span>}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command>
-          <CommandInput placeholder={`Buscar...`} />
-          <CommandList className="max-h-[200px]">
+          <CommandInput placeholder="Buscar..." />
+          <CommandList
+            className="max-h-[200px] overflow-y-auto overscroll-contain"
+            onWheelCapture={(e) => e.stopPropagation()}
+          >
             <CommandEmpty>Nenhum resultado.</CommandEmpty>
             {options.map((opt) => (
               <CommandItem
@@ -125,7 +134,9 @@ function ComboboxField({ options, value, onChange, placeholder }: {
       </PopoverContent>
     </Popover>
   );
-}
+});
+
+ComboboxField.displayName = 'ComboboxField';
 
 export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
   const createMutation = useCreateRequest();
