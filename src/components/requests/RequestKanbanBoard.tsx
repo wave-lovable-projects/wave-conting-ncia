@@ -132,40 +132,56 @@ export function RequestKanbanBoard({ requests, onCardClick, permissions }: Props
 
   const ActiveIcon = activeRequest ? assetTypeIcon[activeRequest.assetType] : null;
 
+  const canDrag = permissions?.canChangeStatus !== false;
+  const useGestorColumns = permissions && !permissions.isAdmin;
+
   return (
     <div className="space-y-4">
       <DndContext
-        sensors={sensors}
+        sensors={canDrag ? sensors : []}
         collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
+        onDragStart={canDrag ? handleDragStart : undefined}
+        onDragEnd={canDrag ? handleDragEnd : undefined}
       >
         <ScrollArea className="w-full">
           <div className="flex gap-2 pb-4">
-            {pipelineColumns.map((col) => (
-              <KanbanColumn
-                key={col.status}
-                {...col}
-                requests={requests.filter((r) => r.status === col.status)}
-                onCardClick={onCardClick}
-              />
-            ))}
+            {useGestorColumns
+              ? GESTOR_KANBAN_COLUMNS.map((col) => (
+                  <KanbanColumn
+                    key={col.status}
+                    status={col.status}
+                    label={col.label}
+                    color={col.color}
+                    requests={requests.filter((r) => col.groupedStatuses.includes(r.status))}
+                    onCardClick={onCardClick}
+                  />
+                ))
+              : pipelineColumns.map((col) => (
+                  <KanbanColumn
+                    key={col.status}
+                    {...col}
+                    requests={requests.filter((r) => r.status === col.status)}
+                    onCardClick={onCardClick}
+                  />
+                ))}
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
-        <DragOverlay>
-          {activeRequest && (
-            <Card className="p-3 border-border shadow-elevated w-52">
-              <p className="text-sm font-medium text-foreground line-clamp-1">{activeRequest.title}</p>
-              {ActiveIcon && (
-                <Badge variant="outline" className="text-[10px] mt-1.5 bg-surface-2 border-border text-muted-foreground gap-0.5">
-                  <ActiveIcon className="h-3 w-3" />
-                  {REQUEST_TYPE_LABELS[activeRequest.assetType]}
-                </Badge>
-              )}
-            </Card>
-          )}
-        </DragOverlay>
+        {canDrag && (
+          <DragOverlay>
+            {activeRequest && (
+              <Card className="p-3 border-border shadow-elevated w-52">
+                <p className="text-sm font-medium text-foreground line-clamp-1">{activeRequest.title}</p>
+                {ActiveIcon && (
+                  <Badge variant="outline" className="text-[10px] mt-1.5 bg-surface-2 border-border text-muted-foreground gap-0.5">
+                    <ActiveIcon className="h-3 w-3" />
+                    {REQUEST_TYPE_LABELS[activeRequest.assetType]}
+                  </Badge>
+                )}
+              </Card>
+            )}
+          </DragOverlay>
+        )}
       </DndContext>
 
       {closedRequests.length > 0 && (
