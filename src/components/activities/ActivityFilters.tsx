@@ -1,16 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { UnifiedFilter } from '@/components/shared/UnifiedFilter';
 import type { FilterCategory } from '@/components/shared/UnifiedFilter';
 import { ENTITY_TYPE_LABELS } from '@/types/activity';
 import type { ActivityFilters } from '@/types/activity';
 import { getMockUsers } from '@/data/mock-users';
-import { Search, CalendarIcon } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 
 interface ActivityFiltersBarProps {
   filters: ActivityFilters;
@@ -19,8 +15,6 @@ interface ActivityFiltersBarProps {
 
 export function ActivityFiltersBar({ filters, onChange }: ActivityFiltersBarProps) {
   const users = getMockUsers();
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
 
   const categories: FilterCategory[] = useMemo(() => [
     { key: 'entityTypes', label: 'Tipo de Entidade', options: Object.entries(ENTITY_TYPE_LABELS).map(([k, v]) => ({ value: k, label: v })) },
@@ -42,14 +36,17 @@ export function ActivityFiltersBar({ filters, onChange }: ActivityFiltersBarProp
     });
   };
 
-  const handleStartDate = (d: Date | undefined) => {
-    setStartDate(d);
-    onChange({ ...filters, startDate: d ? format(d, 'yyyy-MM-dd') : undefined });
-  };
+  const dateRange = useMemo(() => ({
+    from: filters.startDate ? new Date(filters.startDate) : undefined,
+    to: filters.endDate ? new Date(filters.endDate) : undefined,
+  }), [filters.startDate, filters.endDate]);
 
-  const handleEndDate = (d: Date | undefined) => {
-    setEndDate(d);
-    onChange({ ...filters, endDate: d ? format(d, 'yyyy-MM-dd') : undefined });
+  const handleDateRangeChange = (range: { from?: Date; to?: Date }) => {
+    onChange({
+      ...filters,
+      startDate: range.from ? format(range.from, 'yyyy-MM-dd') : undefined,
+      endDate: range.to ? format(range.to, 'yyyy-MM-dd') : undefined,
+    });
   };
 
   return (
@@ -64,31 +61,13 @@ export function ActivityFiltersBar({ filters, onChange }: ActivityFiltersBarProp
         />
       </div>
 
-      <UnifiedFilter categories={categories} values={values} onChange={handleFilterChange} />
-
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className={cn('gap-1', !startDate && 'text-muted-foreground')}>
-            <CalendarIcon className="h-3.5 w-3.5" />
-            {startDate ? format(startDate, 'dd/MM/yyyy') : 'Início'}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar mode="single" selected={startDate} onSelect={handleStartDate} className="p-3 pointer-events-auto" />
-        </PopoverContent>
-      </Popover>
-
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className={cn('gap-1', !endDate && 'text-muted-foreground')}>
-            <CalendarIcon className="h-3.5 w-3.5" />
-            {endDate ? format(endDate, 'dd/MM/yyyy') : 'Fim'}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar mode="single" selected={endDate} onSelect={handleEndDate} className="p-3 pointer-events-auto" />
-        </PopoverContent>
-      </Popover>
+      <UnifiedFilter
+        categories={categories}
+        values={values}
+        onChange={handleFilterChange}
+        dateRange={dateRange}
+        onDateRangeChange={handleDateRangeChange}
+      />
     </div>
   );
 }
