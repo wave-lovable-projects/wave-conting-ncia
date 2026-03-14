@@ -1,16 +1,12 @@
 import { useState, useMemo } from 'react';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { Button } from '@/components/ui/button';
 import { RequestDashboard } from '@/components/requests/RequestDashboard';
 import { useRequests } from '@/hooks/useRequests';
 import { useUIStore } from '@/store/ui.store';
 import { useRequestPermissions } from '@/hooks/useRequestPermissions';
-import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import type { RequestFilters } from '@/types/request';
 
 export default function SolicitacoesDashboard() {
-  const navigate = useNavigate();
   const [filters, setFilters] = useState<RequestFilters>({});
   const { data: allRequests } = useRequests({});
   const user = useUIStore((s) => s.user);
@@ -27,14 +23,7 @@ export default function SolicitacoesDashboard() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Dashboard de Solicitações"
-        actions={
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate('/solicitacoes')}>
-            <ArrowLeft className="h-4 w-4" /> Voltar
-          </Button>
-        }
-      />
+      <PageHeader title="Dashboard" />
       <RequestDashboard requests={visibleAll} onFilterChange={handleDashboardFilter} />
     </div>
   );
