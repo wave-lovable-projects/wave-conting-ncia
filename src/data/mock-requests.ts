@@ -152,7 +152,7 @@ let mockRequests: Request[] = [
   },
   {
     id: 'req14', title: 'Pedido misto: contas + perfis + BM', description: 'Kit completo para novo gestor que está entrando na operação',
-    assetType: 'MISTO', priority: 'HIGH', status: 'RECEBIDA', quantity: 6, quantityDelivered: 0, linkedAssetIds: [],
+    assetType: 'CONTA_ANUNCIO', priority: 'HIGH', status: 'RECEBIDA', quantity: 6, quantityDelivered: 0, linkedAssetIds: [],
     requesterId: 'u4', requesterName: 'Rafael Santos',
     supplierId: 's2', supplierName: 'AdAccounts Pro', supplierOrderId: 'AAP-0090', supplierOrderDate: '2025-03-05T10:00:00Z', supplierReceivedDate: '2025-03-11T10:00:00Z', supplierCost: 520,
     attachments: [], createdAt: '2025-03-03T10:00:00Z', updatedAt: '2025-03-11T10:00:00Z',
