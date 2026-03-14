@@ -88,11 +88,13 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
 
           <div className="flex-1 overflow-y-auto px-6 py-4">
             <TabsContent value="overview" className="mt-0">
-              <OverviewTab request={request} />
+              <OverviewTab request={request} permissions={permissions} />
             </TabsContent>
-            <TabsContent value="supplier" className="mt-0">
-              <SupplierTab request={request} />
-            </TabsContent>
+            {permissions.canViewSupplierInfo && (
+              <TabsContent value="supplier" className="mt-0">
+                <SupplierTab request={request} />
+              </TabsContent>
+            )}
             <TabsContent value="assets" className="mt-0">
               <LinkedAssetsTab request={request} />
             </TabsContent>
