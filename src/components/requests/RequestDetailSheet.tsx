@@ -76,7 +76,9 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
           <TabsList className="mx-6 w-auto justify-start bg-surface-1 overflow-x-auto">
             <TabsTrigger value="overview" className="gap-1.5 text-xs"><Eye className="h-3.5 w-3.5" />Visão Geral</TabsTrigger>
-            <TabsTrigger value="supplier" className="gap-1.5 text-xs"><Truck className="h-3.5 w-3.5" />Fornecedor</TabsTrigger>
+            {permissions.canViewSupplierInfo && (
+              <TabsTrigger value="supplier" className="gap-1.5 text-xs"><Truck className="h-3.5 w-3.5" />Fornecedor</TabsTrigger>
+            )}
             <TabsTrigger value="assets" className="gap-1.5 text-xs"><Package className="h-3.5 w-3.5" />Ativos</TabsTrigger>
             {showWarmingTab && (
               <TabsTrigger value="warming" className="gap-1.5 text-xs"><Flame className="h-3.5 w-3.5" />Aquecimento</TabsTrigger>
