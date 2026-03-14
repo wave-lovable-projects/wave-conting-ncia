@@ -1,23 +1,23 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { RequestFiltersBar } from '@/components/requests/RequestFilters';
 import { RequestTable } from '@/components/requests/RequestTable';
 import { RequestKanbanBoard } from '@/components/requests/RequestKanbanBoard';
 import { RequestDialog } from '@/components/requests/RequestDialog';
 import { RequestDetailSheet } from '@/components/requests/RequestDetailSheet';
-import { RequestDashboard } from '@/components/requests/RequestDashboard';
 import { PriorityBadge } from '@/components/shared/PriorityBadge';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { useRequests, useUpdateRequestStatus, useRequestTemplates, useDeleteRequestTemplate } from '@/hooks/useRequests';
 import { useUIStore } from '@/store/ui.store';
 import { useRequestPermissions } from '@/hooks/useRequestPermissions';
 import { REQUEST_TYPE_LABELS } from '@/types/request';
 import type { RequestFilters, Request, RequestStatus, RequestTemplate } from '@/types/request';
-import { Plus, List, Columns3, BarChart3, ChevronUp, FileText, Briefcase, User, Globe, BarChart2, DollarSign, Layers, Trash2, Play } from 'lucide-react';
+import { Plus, List, Columns3, BarChart3, FileText, Briefcase, User, Globe, BarChart2, DollarSign, Layers, Trash2, Play, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 const VALID_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
@@ -43,11 +43,11 @@ const ASSET_TYPE_ICONS: Record<string, typeof Briefcase> = {
 };
 
 export default function Solicitacoes() {
+  const navigate = useNavigate();
   const [view, setView] = useState<'list' | 'kanban' | 'templates'>('list');
   const [filters, setFilters] = useState<RequestFilters>({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
-  const [dashboardOpen, setDashboardOpen] = useState(true);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [templateForDialog, setTemplateForDialog] = useState<RequestTemplate | null>(null);
   const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
@@ -60,7 +60,6 @@ export default function Solicitacoes() {
   const user = useUIStore((s) => s.user);
   const permissions = useRequestPermissions(user?.role, user?.id);
 
-  // Filter requests by ownership for non-admin users
   const visibleAll = useMemo(() => {
     if (permissions.canViewAllRequests || !user) return allRequests ?? [];
     return (allRequests ?? []).filter((r) => r.requesterId === user.id);
@@ -103,10 +102,6 @@ export default function Solicitacoes() {
     );
   };
 
-  const handleDashboardFilter = (f: Partial<RequestFilters>) => {
-    setFilters((prev) => ({ ...prev, ...f }));
-  };
-
   const handleUseTemplate = (tpl: RequestTemplate) => {
     setPickerOpen(false);
     setTemplateForDialog(tpl);
@@ -134,13 +129,12 @@ export default function Solicitacoes() {
         actions={
           <div className="flex items-center gap-2">
             <Button
-              variant={dashboardOpen ? 'secondary' : 'ghost'}
+              variant="outline"
               size="sm"
               className="gap-1.5"
-              onClick={() => setDashboardOpen((o) => !o)}
+              onClick={() => navigate('/solicitacoes/dashboard')}
             >
-              {dashboardOpen ? <ChevronUp className="h-4 w-4" /> : <BarChart3 className="h-4 w-4" />}
-              {dashboardOpen ? 'Ocultar' : 'Dashboard'}
+              <BarChart3 className="h-4 w-4" /> Dashboard
             </Button>
             <div className="flex items-center rounded-lg border border-border overflow-hidden">
               <Button
@@ -168,24 +162,30 @@ export default function Solicitacoes() {
                 <FileText className="h-4 w-4" /> Templates
               </Button>
             </div>
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setPickerOpen(true)}>
-              <FileText className="h-4 w-4" /> Usar Template
-            </Button>
-            <Button onClick={() => { setTemplateForDialog(null); setDialogOpen(true); }} className="gap-2">
-              <Plus className="h-4 w-4" /> Nova Solicitação
-            </Button>
+            {/* Split button: Nova Solicitação + Usar Template */}
+            <div className="flex items-center">
+              <Button
+                onClick={() => { setTemplateForDialog(null); setDialogOpen(true); }}
+                className="gap-2 rounded-r-none"
+              >
+                <Plus className="h-4 w-4" /> Nova Solicitação
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="rounded-l-none border-l border-primary-foreground/20 px-2">
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setPickerOpen(true)} className="gap-2">
+                    <FileText className="h-4 w-4" /> Usar Template
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         }
       />
-
-      <Collapsible open={dashboardOpen} onOpenChange={setDashboardOpen}>
-        <CollapsibleContent>
-          <RequestDashboard
-            requests={visibleAll}
-            onFilterChange={handleDashboardFilter}
-          />
-        </CollapsibleContent>
-      </Collapsible>
 
       {view === 'templates' ? (
         <TemplatesGrid

@@ -16,6 +16,7 @@ import Paginas from "@/pages/Paginas";
 import Pixels from "@/pages/Pixels";
 import Fornecedores from "@/pages/Fornecedores";
 import Solicitacoes from "@/pages/Solicitacoes";
+import SolicitacoesDashboard from "@/pages/SolicitacoesDashboard";
 import Diagnostico from "@/pages/Diagnostico";
 
 import Usuarios from "@/pages/Usuarios";
@@ -49,6 +50,7 @@ const App = () => (
               <Route path="/paginas" element={<Paginas />} />
               <Route path="/pixels" element={<Pixels />} />
               <Route path="/fornecedores" element={<Fornecedores />} />
+              <Route path="/solicitacoes/dashboard" element={<SolicitacoesDashboard />} />
               <Route path="/solicitacoes" element={<Solicitacoes />} />
               <Route path="/diagnostico" element={<Diagnostico />} />
               

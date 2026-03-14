@@ -7,7 +7,7 @@ const priorityConfig: Record<Priority, { label: string; className: string }> = {
   LOW: { label: 'Baixa', className: 'bg-muted text-muted-foreground border-border' },
   MEDIUM: { label: 'Média', className: 'bg-info/15 text-info border-info/30' },
   HIGH: { label: 'Alta', className: 'bg-caution/15 text-caution border-caution/30' },
-  URGENT: { label: 'Urgente', className: 'bg-destructive/15 text-destructive border-destructive/30 animate-pulse-glow' },
+  URGENT: { label: 'Urgente', className: 'bg-destructive/15 text-destructive border-destructive/30' },
 };
 
 interface PriorityBadgeProps {
