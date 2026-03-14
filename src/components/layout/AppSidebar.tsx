@@ -11,6 +11,7 @@ import {
   Search,
   Activity,
   Zap,
+  BarChart3,
   PanelLeftClose,
   PanelLeft,
   Waves,
