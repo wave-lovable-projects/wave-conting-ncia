@@ -17,7 +17,7 @@ import { useUIStore } from '@/store/ui.store';
 import { useRequestPermissions } from '@/hooks/useRequestPermissions';
 import { REQUEST_TYPE_LABELS } from '@/types/request';
 import type { RequestFilters, Request, RequestStatus, RequestTemplate } from '@/types/request';
-import { Plus, List, Columns3, BarChart3, FileText, Briefcase, User, Globe, BarChart2, DollarSign, Layers, Trash2, Play, ChevronDown } from 'lucide-react';
+import { Plus, List, Columns3, BarChart3, FileText, Briefcase, User, Globe, BarChart2, DollarSign, Trash2, Play, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 const VALID_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
