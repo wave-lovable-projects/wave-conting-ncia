@@ -174,9 +174,7 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
       if (values.specDestAccount) specs.contaDestino = values.specDestAccount;
       if (values.specAmount) specs.valor = values.specAmount;
       if (values.specAmountCurrency) specs.moeda = values.specAmountCurrency;
-    } else if (t === 'MISTO') {
-      if (values.specDetails) specs.detalhes = values.specDetails;
-    }
+  }
     return specs;
   }
 
