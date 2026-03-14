@@ -84,7 +84,7 @@ export default function Solicitacoes() {
     updateStatus.mutate(
       { id: r.id, status: 'CANCELADA', changedBy: user?.name ?? 'Sistema' },
       {
-        onSuccess: () => toast.success('Solicitação cancelada'),
+        onSuccess: () => toast.success('Solicitação cancelada — nenhuma ação adicional necessária'),
         onError: () => toast.error('Erro ao cancelar solicitação'),
       }
     );

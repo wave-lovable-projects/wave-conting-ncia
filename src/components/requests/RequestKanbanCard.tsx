@@ -16,6 +16,7 @@ import {
   Layers,
   Clock,
   CalendarDays,
+  AlertTriangle,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -46,6 +47,8 @@ const assetTypeUnit: Record<RequestType, string> = {
   MISTO: 'itens',
 };
 
+const TERMINAL_STATUSES = ['ENTREGUE', 'REJEITADA', 'CANCELADA'];
+
 function getDaysInStage(request: Request): number {
   const lastChange = request.statusHistory.length > 0
     ? request.statusHistory[request.statusHistory.length - 1].changedAt
@@ -75,6 +78,8 @@ export function RequestKanbanCard({ request, onClick, compact = false }: Props) 
   const daysInStage = getDaysInStage(request);
   const showTimeWarning = daysInStage > 3;
   const isDanger = daysInStage > 7;
+  const isUrgent = request.priority === 'URGENT';
+  const isStale = daysInStage > 5 && !TERMINAL_STATUSES.includes(request.status);
 
   if (compact) {
     return (
@@ -82,7 +87,11 @@ export function RequestKanbanCard({ request, onClick, compact = false }: Props) 
         className={`p-2 border-border border-l-[3px] ${priorityBorderColor[request.priority]} cursor-pointer hover:bg-card-hover transition-colors`}
         onClick={() => onClick(request)}
       >
-        <p className="text-xs font-medium text-foreground line-clamp-1">{request.title}</p>
+        <div className="flex items-center gap-1">
+          {isUrgent && <AlertTriangle className="h-3 w-3 text-destructive animate-pulse shrink-0" />}
+          <p className="text-xs font-medium text-foreground line-clamp-1">{request.title}</p>
+          {isStale && <span className="text-[10px] shrink-0">⏰</span>}
+        </div>
         <div className="flex items-center gap-1.5 mt-1">
           <Badge variant="outline" className="text-[10px] bg-surface-2 border-border text-muted-foreground gap-0.5 px-1.5">
             <Icon className="h-3 w-3" />
@@ -104,10 +113,16 @@ export function RequestKanbanCard({ request, onClick, compact = false }: Props) 
       onClick={() => onClick(request)}
     >
       <div className="flex items-start justify-between gap-1 mb-1.5">
-        <h4 className="text-sm font-medium text-foreground line-clamp-2 flex-1">{request.title}</h4>
-        {showTimeWarning && (
-          <Clock className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${isDanger ? 'text-destructive' : 'text-warning'}`} />
-        )}
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          {isUrgent && <AlertTriangle className="h-3.5 w-3.5 text-destructive animate-pulse shrink-0" />}
+          <h4 className="text-sm font-medium text-foreground line-clamp-2">{request.title}</h4>
+        </div>
+        <div className="flex items-center gap-1 shrink-0 mt-0.5">
+          {isStale && <span className="text-xs" title={`Parada há ${daysInStage} dias`}>⏰</span>}
+          {showTimeWarning && (
+            <Clock className={`h-3.5 w-3.5 ${isDanger ? 'text-destructive' : 'text-warning'}`} />
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-1.5 mb-2 flex-wrap">

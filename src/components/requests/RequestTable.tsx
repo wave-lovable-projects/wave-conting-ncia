@@ -5,7 +5,7 @@ import { PriorityBadge } from '@/components/shared/PriorityBadge';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Eye, ArrowRight, Copy, XCircle, ArrowUpDown, CreditCard, UserCircle, Globe, LayoutGrid, Target, DollarSign, Layers } from 'lucide-react';
+import { MoreHorizontal, Eye, ArrowRight, Copy, XCircle, ArrowUpDown, CreditCard, UserCircle, Globe, LayoutGrid, Target, DollarSign, Layers, AlertTriangle } from 'lucide-react';
 import type { Request, RequestType, RequestStatus } from '@/types/request';
 import { REQUEST_TYPE_LABELS } from '@/types/request';
 import { format, differenceInDays } from 'date-fns';
@@ -43,6 +43,8 @@ const NEXT_STATUS_LABEL: Partial<Record<RequestStatus, string>> = {
   EM_AQUECIMENTO: 'Marcar Pronta',
   PRONTA: 'Entregar',
 };
+
+const TERMINAL_STATUSES: RequestStatus[] = ['ENTREGUE', 'REJEITADA', 'CANCELADA'];
 
 type SortKey = 'title' | 'assetType' | 'quantity' | 'delivered' | 'priority' | 'status' | 'requesterName' | 'assigneeName' | 'supplierName' | 'dueDate' | 'daysInStage' | 'createdAt';
 
@@ -139,6 +141,8 @@ export function RequestTable({ requests, onView, onAdvanceStatus, onCancel }: Pr
             const nextStatuses = VALID_TRANSITIONS[r.status] ?? [];
             const canAdvance = nextStatuses.length > 0 && nextStatuses[0] !== 'REJEITADA' && nextStatuses[0] !== 'CANCELADA';
             const canCancel = nextStatuses.includes('CANCELADA');
+            const isStale = days > 5 && !TERMINAL_STATUSES.includes(r.status);
+            const isUrgent = r.priority === 'URGENT';
 
             return (
               <TableRow key={r.id} className="hover:bg-surface-1/50 group/row">
@@ -188,8 +192,18 @@ export function RequestTable({ requests, onView, onAdvanceStatus, onCancel }: Pr
                 <TableCell className={cn('text-sm font-medium', isComplete ? 'text-success' : 'text-muted-foreground')}>
                   {r.quantityDelivered}/{r.quantity}
                 </TableCell>
-                <TableCell><PriorityBadge priority={r.priority} /></TableCell>
-                <TableCell><StatusBadge status={r.status} /></TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1.5">
+                    {isUrgent && <AlertTriangle className="h-3.5 w-3.5 text-destructive animate-pulse" />}
+                    <PriorityBadge priority={r.priority} />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1.5">
+                    <StatusBadge status={r.status} />
+                    {isStale && <span className="text-xs" title={`Parada há ${days} dias`}>⏰</span>}
+                  </div>
+                </TableCell>
                 <TableCell className="text-muted-foreground text-sm">{r.requesterName}</TableCell>
                 <TableCell className="text-muted-foreground text-sm">{r.assigneeName ?? '—'}</TableCell>
                 <TableCell className="text-muted-foreground text-sm">{r.supplierName ?? '—'}</TableCell>
