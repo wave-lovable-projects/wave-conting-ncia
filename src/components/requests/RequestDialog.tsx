@@ -83,9 +83,6 @@ function applySpecsToForm(type: RequestType, specs: Record<string, string>, form
   } else if (type === 'PAGINA') {
     if (specs.nicho) form.setValue('specNiche', specs.nicho);
     if (specs.comHistorico) form.setValue('specHistory', specs.comHistorico === 'Sim');
-  } else if (type === 'PIXEL') {
-    if (specs.dominio) form.setValue('specDomain', specs.dominio);
-    if (specs.bmDesejada) form.setValue('specBm', specs.bmDesejada);
   } else if (type === 'SALDO') {
     if (specs.contaDestino) form.setValue('specDestAccount', specs.contaDestino);
     if (specs.valor) form.setValue('specAmount', specs.valor);
