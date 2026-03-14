@@ -341,7 +341,13 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
               <FormField control={form.control} name="description" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Descrição *</FormLabel>
-                  <FormControl><Textarea placeholder="Descreva a solicitação..." rows={3} {...field} /></FormControl>
+                  <FormControl>
+                    <RichTextEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Descreva a solicitação..."
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />

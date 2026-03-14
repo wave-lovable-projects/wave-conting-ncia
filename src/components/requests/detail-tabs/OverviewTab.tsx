@@ -17,6 +17,7 @@ import {
 import type { Request, RequestStatus, RequestType } from '@/types/request';
 import { cn } from '@/lib/utils';
 import type { RequestPermissions } from '@/hooks/useRequestPermissions';
+import { RichTextViewer } from '@/components/shared/RichTextViewer';
 
 const VALID_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
   PENDENTE: ['APROVADA', 'REJEITADA'],
