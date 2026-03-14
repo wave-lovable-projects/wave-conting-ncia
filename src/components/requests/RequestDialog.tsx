@@ -87,8 +87,6 @@ function applySpecsToForm(type: RequestType, specs: Record<string, string>, form
     if (specs.contaDestino) form.setValue('specDestAccount', specs.contaDestino);
     if (specs.valor) form.setValue('specAmount', specs.valor);
     if (specs.moeda) form.setValue('specAmountCurrency', specs.moeda);
-  } else if (type === 'MISTO') {
-    if (specs.detalhes) form.setValue('specDetails', specs.detalhes);
   }
 }
 
