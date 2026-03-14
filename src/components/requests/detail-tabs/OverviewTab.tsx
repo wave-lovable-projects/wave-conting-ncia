@@ -65,9 +65,9 @@ const TYPE_ICONS: Record<RequestType, React.ElementType> = {
   MISTO: Layers,
 };
 
-interface Props { request: Request }
+interface Props { request: Request; permissions?: RequestPermissions }
 
-export function OverviewTab({ request }: Props) {
+export function OverviewTab({ request, permissions }: Props) {
   const updateStatus = useUpdateRequestStatus();
   const updateRequest = useUpdateRequest();
   const user = useUIStore((s) => s.user);
