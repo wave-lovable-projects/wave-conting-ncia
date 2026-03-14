@@ -463,6 +463,7 @@ function SpecContaAnuncio({ form, bms, portalContainer }: { form: any; bms: any[
               value={field.value || ''}
               onChange={field.onChange}
               placeholder="Selecionar BM"
+              portalContainer={portalContainer}
             />
           </FormControl>
         </FormItem>
