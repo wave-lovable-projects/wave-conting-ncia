@@ -178,11 +178,8 @@ function ProfileHeader({ profile }: { profile: Profile }) {
         <EditableSelect
           value={profile.status}
           onSave={v => handleUpdate('status', v)}
-          options={[
-            { value: 'ACTIVE', label: 'Ativo' },
-            { value: 'DISABLED', label: 'Desabilitado' },
-            { value: 'BLOCKED', label: 'Bloqueado' },
-          ]}
+          options={STATUS_OPTIONS}
+          renderValue={v => <StatusBadge status={v} />}
         />
       </div>
       <div className="flex items-center gap-1.5">
