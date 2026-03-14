@@ -204,7 +204,8 @@ export default function Solicitacoes() {
         title="Excluir Template"
         description="Tem certeza que deseja excluir este template? Esta ação não pode ser desfeita."
         onConfirm={handleDeleteTemplate}
-        variant="destructive"
+        onCancel={() => setDeleteTemplateId(null)}
+        variant="danger"
       />
     </div>
   );
