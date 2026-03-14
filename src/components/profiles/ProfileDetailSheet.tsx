@@ -269,7 +269,7 @@ function ProfileConfigGrid({ profile }: { profile: Profile }) {
           <EditableField value={profile.proxy || ''} onSave={v => handleUpdate('proxy', v)} label="Proxy" mono />
         </div>
 
-        {items.map(item => {
+        {dateItems.map(item => {
           const Icon = item.icon;
           return (
             <div key={item.label} className="flex flex-col gap-0.5">
