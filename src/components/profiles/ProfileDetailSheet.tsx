@@ -21,6 +21,24 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Copy, Shield, Flame, MessageSquare, Plus, Send, CalendarIcon, ExternalLink, Save, Loader2, User, Globe, Key, Eye, EyeOff, Pencil, History, Package, UserCog, Users, Wifi, Clock, CalendarDays, Ban } from 'lucide-react';
 
+const STATUS_OPTIONS = [
+  { value: 'ACTIVE', label: 'Ativo' },
+  { value: 'DISABLED', label: 'Desativado' },
+  { value: 'BLOCKED', label: 'Bloqueado' },
+];
+
+const SUPPLIER_OPTIONS = [
+  { value: 's1', label: 'Fornecedor Alpha' },
+  { value: 's2', label: 'Fornecedor Beta' },
+  { value: 's3', label: 'Fornecedor Gamma' },
+];
+
+const MANAGER_OPTIONS = [
+  { value: 'u1', label: 'João Silva' },
+  { value: 'u2', label: 'Maria Souza' },
+  { value: 'u3', label: 'Carlos Lima' },
+];
+
 interface ProfileDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -70,49 +88,72 @@ function EditableField({ value, onSave, label, mono, type = 'text' }: {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { setDraft(value); }, [value]);
-  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [editing]);
 
   const save = () => {
     setEditing(false);
     if (draft !== value) onSave(draft);
   };
 
-  if (editing) {
-    return (
-      <Input
-        ref={inputRef}
-        value={draft}
-        onChange={e => setDraft(e.target.value)}
-        onBlur={save}
-        onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setDraft(value); setEditing(false); } }}
-        className={cn('h-7 text-sm', mono && 'font-mono')}
-        type={type}
-      />
-    );
-  }
-
   return (
     <div
-      className="group/edit flex items-center gap-1 rounded px-1.5 py-0.5 -mx-1.5 cursor-pointer hover:bg-muted/50 transition-colors min-h-[28px]"
-      onClick={() => setEditing(true)}
+      className="group/edit flex items-center gap-1 rounded px-1.5 py-0.5 -mx-1.5 cursor-text hover:bg-muted/50 transition-colors min-h-[28px]"
+      onClick={() => !editing && setEditing(true)}
     >
-      <span className={cn('text-sm', mono && 'font-mono', !value && 'text-muted-foreground')}>
-        {value || '—'}
-      </span>
-      <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover/edit:opacity-100 transition-opacity shrink-0" />
+      {editing ? (
+        <input
+          ref={inputRef}
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onBlur={save}
+          onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setDraft(value); setEditing(false); } }}
+          type={type}
+          className={cn(
+            'bg-transparent border-none outline-none p-0 w-full text-sm text-foreground',
+            'border-b border-dashed border-primary/40 focus:border-primary',
+            mono && 'font-mono'
+          )}
+        />
+      ) : (
+        <>
+          <span className={cn('text-sm', mono && 'font-mono', !value && 'text-muted-foreground')}>
+            {value || '—'}
+          </span>
+          <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover/edit:opacity-100 transition-opacity shrink-0" />
+        </>
+      )}
     </div>
   );
 }
 
-function EditableSelect({ value, onSave, options }: {
+/* ─── Inline Editable Select ─── */
+function EditableSelect({ value, onSave, options, renderValue }: {
   value: string;
   onSave: (val: string) => void;
   options: { value: string; label: string }[];
+  renderValue?: (val: string) => React.ReactNode;
 }) {
+  const [selectOpen, setSelectOpen] = useState(false);
+  const displayLabel = options.find(o => o.value === value)?.label || value || '—';
+
   return (
-    <Select value={value} onValueChange={onSave}>
-      <SelectTrigger className="h-7 text-sm w-full">
-        <SelectValue />
+    <Select
+      value={value}
+      onValueChange={v => { onSave(v); setSelectOpen(false); }}
+      open={selectOpen}
+      onOpenChange={setSelectOpen}
+    >
+      <SelectTrigger
+        className="h-auto border-none shadow-none bg-transparent hover:bg-muted/50 transition-colors px-1.5 py-0.5 -mx-1.5 gap-1 group/sel focus:ring-0 focus:ring-offset-0 [&>svg]:opacity-0 [&>svg]:group-hover/sel:opacity-100 [&>svg]:transition-opacity"
+      >
+        {renderValue ? renderValue(value) : (
+          <span className={cn('text-sm', !value && 'text-muted-foreground')}>{displayLabel}</span>
+        )}
       </SelectTrigger>
       <SelectContent>
         {options.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
@@ -155,11 +196,8 @@ function ProfileHeader({ profile }: { profile: Profile }) {
         <EditableSelect
           value={profile.status}
           onSave={v => handleUpdate('status', v)}
-          options={[
-            { value: 'ACTIVE', label: 'Ativo' },
-            { value: 'DISABLED', label: 'Desabilitado' },
-            { value: 'BLOCKED', label: 'Bloqueado' },
-          ]}
+          options={STATUS_OPTIONS}
+          renderValue={v => <StatusBadge status={v} />}
         />
       </div>
       <div className="flex items-center gap-1.5">
@@ -185,22 +223,53 @@ function ProfileConfigGrid({ profile }: { profile: Profile }) {
     updateProfile.mutate({ id: profile.id, [field]: value } as any);
   };
 
-  const items: { label: string; icon: React.ElementType; field: string; value: string; mono?: boolean; editable?: boolean }[] = [
-    { label: 'Fornecedor', icon: Package, field: 'supplierName', value: profile.supplierName || '', editable: true },
-    { label: 'Gestor', icon: UserCog, field: 'managerName', value: profile.managerName || '', editable: true },
-    { label: 'Auxiliar', icon: Users, field: 'auxiliarName', value: profile.auxiliarName || '', editable: true },
-    { label: 'Proxy', icon: Wifi, field: 'proxy', value: profile.proxy || '', mono: true, editable: true },
-    { label: 'Dt. Recebimento', icon: CalendarDays, field: 'receivedAt', value: profile.receivedAt ? format(new Date(profile.receivedAt), 'dd/MM/yyyy') : '', editable: false },
-    { label: 'Dt. Desativação', icon: Ban, field: 'deactivatedAt', value: profile.deactivatedAt ? format(new Date(profile.deactivatedAt), 'dd/MM/yyyy') : '', editable: false },
-    { label: 'Criado em', icon: Clock, field: 'createdAt', value: format(new Date(profile.createdAt), 'dd/MM/yyyy HH:mm'), editable: false },
-    { label: 'Atualizado em', icon: Clock, field: 'updatedAt', value: format(new Date(profile.updatedAt), 'dd/MM/yyyy HH:mm'), editable: false },
-  ];
+    const selectFields: { label: string; icon: React.ElementType; idField: string; nameField: string; currentId: string; currentName: string; options: { value: string; label: string }[] }[] = [
+      { label: 'Fornecedor', icon: Package, idField: 'supplierId', nameField: 'supplierName', currentId: profile.supplierId || '', currentName: profile.supplierName || '', options: SUPPLIER_OPTIONS },
+      { label: 'Gestor', icon: UserCog, idField: 'managerId', nameField: 'managerName', currentId: profile.managerId || '', currentName: profile.managerName || '', options: MANAGER_OPTIONS },
+      { label: 'Auxiliar', icon: Users, idField: 'auxiliarId', nameField: 'auxiliarName', currentId: profile.auxiliarId || '', currentName: profile.auxiliarName || '', options: MANAGER_OPTIONS },
+    ];
 
-  return (
+    const dateItems: { label: string; icon: React.ElementType; value: string }[] = [
+      { label: 'Dt. Recebimento', icon: CalendarDays, value: profile.receivedAt ? format(new Date(profile.receivedAt), 'dd/MM/yyyy') : '' },
+      { label: 'Dt. Desativação', icon: Ban, value: profile.deactivatedAt ? format(new Date(profile.deactivatedAt), 'dd/MM/yyyy') : '' },
+      { label: 'Criado em', icon: Clock, value: format(new Date(profile.createdAt), 'dd/MM/yyyy HH:mm') },
+      { label: 'Atualizado em', icon: Clock, value: format(new Date(profile.updatedAt), 'dd/MM/yyyy HH:mm') },
+    ];
+
+    return (
     <div>
       <h3 className="text-sm font-semibold text-foreground mb-3">Configurações</h3>
       <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-        {items.map(item => {
+        {selectFields.map(sf => {
+          const Icon = sf.icon;
+          return (
+            <div key={sf.label} className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1.5">
+                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">{sf.label}</span>
+              </div>
+              <EditableSelect
+                value={sf.currentId}
+                onSave={v => {
+                  const label = sf.options.find(o => o.value === v)?.label || '';
+                  updateProfile.mutate({ id: profile.id, [sf.idField]: v, [sf.nameField]: label } as any);
+                }}
+                options={sf.options}
+              />
+            </div>
+          );
+        })}
+
+        {/* Proxy — text field */}
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-1.5">
+            <Wifi className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Proxy</span>
+          </div>
+          <EditableField value={profile.proxy || ''} onSave={v => handleUpdate('proxy', v)} label="Proxy" mono />
+        </div>
+
+        {dateItems.map(item => {
           const Icon = item.icon;
           return (
             <div key={item.label} className="flex flex-col gap-0.5">
@@ -208,13 +277,9 @@ function ProfileConfigGrid({ profile }: { profile: Profile }) {
                 <Icon className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">{item.label}</span>
               </div>
-              {item.editable ? (
-                <EditableField value={item.value} onSave={v => handleUpdate(item.field, v)} label={item.label} mono={item.mono} />
-              ) : (
-                <span className={cn('text-sm text-foreground px-1.5', item.mono && 'font-mono', !item.value && 'text-muted-foreground')}>
-                  {item.value || '—'}
-                </span>
-              )}
+              <span className={cn('text-sm text-foreground px-1.5', !item.value && 'text-muted-foreground')}>
+                {item.value || '—'}
+              </span>
             </div>
           );
         })}
