@@ -83,9 +83,7 @@ const TYPE_ICONS: Record<RequestType, React.ElementType> = {
   BUSINESS_MANAGER: LayoutGrid,
   PERFIL: UserCircle,
   PAGINA: Globe,
-  
   SALDO: DollarSign,
-  MISTO: Layers,
 };
 
 interface Props { request: Request; permissions?: RequestPermissions }
