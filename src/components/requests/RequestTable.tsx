@@ -131,7 +131,7 @@ export function RequestTable({ requests, onView, onAdvanceStatus, onCancel, hide
             <SortHeader label="Status" colKey="status" />
             <SortHeader label="Solicitante" colKey="requesterName" />
             <SortHeader label="Responsável" colKey="assigneeName" />
-            <SortHeader label="Fornecedor" colKey="supplierName" />
+            {!hideSupplierColumn && <SortHeader label="Fornecedor" colKey="supplierName" />}
             <SortHeader label="Data Desejada" colKey="dueDate" />
             <SortHeader label="Tempo na Etapa" colKey="daysInStage" />
             <SortHeader label="Criado em" colKey="createdAt" />
