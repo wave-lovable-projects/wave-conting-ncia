@@ -65,7 +65,7 @@ function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col min-h-[400px] min-w-[180px] w-[180px] lg:flex-1 rounded-lg border border-border bg-surface-0 transition-colors shrink-0 ${isOver ? 'bg-surface-1 ring-1 ring-primary/30' : ''}`}
+      className={`flex flex-col min-h-[400px] min-w-[260px] w-[260px] lg:flex-1 rounded-lg border border-border bg-surface-0 transition-colors shrink-0 ${isOver ? 'bg-surface-1 ring-1 ring-primary/30' : ''}`}
     >
       <div className="p-2.5 border-b border-border">
         <div className="flex items-center gap-2 mb-1">
