@@ -73,6 +73,18 @@ export function useDeletePixel() {
   });
 }
 
+export function useBulkUpdatePixels() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ids, data }: { ids: string[]; data: Partial<Pixel> }) => {
+      const idSet = new Set(ids);
+      setMockPixels(getMockPixels().map(p => idSet.has(p.id) ? { ...p, ...data, updatedAt: new Date().toISOString() } : p));
+      return Promise.resolve();
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['pixels'] }); },
+  });
+}
+
 export function useBulkDeletePixels() {
   const qc = useQueryClient();
   return useMutation({

@@ -62,6 +62,18 @@ export function useUpdatePage() {
   });
 }
 
+export function useBulkUpdatePages() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ids, data }: { ids: string[]; data: Partial<FacebookPage> }) => {
+      const idSet = new Set(ids);
+      setMockPages(getMockPages().map(p => idSet.has(p.id) ? { ...p, ...data, updatedAt: new Date().toISOString() } : p));
+      return Promise.resolve();
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['pages'] }); },
+  });
+}
+
 export function useDeletePage() {
   const qc = useQueryClient();
   return useMutation({

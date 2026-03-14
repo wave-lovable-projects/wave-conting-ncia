@@ -62,6 +62,18 @@ export function useUpdateProfile() {
   });
 }
 
+export function useBulkUpdateProfiles() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ids, data }: { ids: string[]; data: Partial<Profile> }) => {
+      const idSet = new Set(ids);
+      setMockProfiles(getMockProfiles().map(p => idSet.has(p.id) ? { ...p, ...data, updatedAt: new Date().toISOString() } : p));
+      return Promise.resolve();
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['profiles'] }); },
+  });
+}
+
 export function useDeleteProfile() {
   const qc = useQueryClient();
   return useMutation({
