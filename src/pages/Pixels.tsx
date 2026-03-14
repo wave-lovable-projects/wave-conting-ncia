@@ -20,12 +20,6 @@ const STATUS_OPTIONS = [
   { value: 'BLOCKED', label: 'Bloqueado' },
 ];
 
-const SUPPLIER_OPTIONS = [
-  { value: 's1', label: 'Fornecedor Alpha' },
-  { value: 's2', label: 'Fornecedor Beta' },
-  { value: 's3', label: 'Fornecedor Gamma' },
-];
-
 const BM_OPTIONS = [
   { value: 'bm-1', label: 'BM Principal Ads' },
   { value: 'bm-2', label: 'BM Backup 01' },
