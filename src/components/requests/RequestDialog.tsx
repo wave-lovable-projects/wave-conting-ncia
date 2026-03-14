@@ -522,7 +522,7 @@ function SpecBM({ form, portalContainer }: { form: any; portalContainer?: HTMLEl
   );
 }
 
-function SpecSaldo({ form, adAccounts }: { form: any; adAccounts: any[] }) {
+function SpecSaldo({ form, adAccounts, portalContainer }: { form: any; adAccounts: any[]; portalContainer?: HTMLElement | null }) {
   const accountOptions: ComboboxOption[] = adAccounts.map((a) => ({
     value: a.name,
     label: `${a.name} (${a.accountId})`,
