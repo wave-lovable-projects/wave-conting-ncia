@@ -59,7 +59,12 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
     }
   };
 
-  const actions = STATUS_ACTION[request.status] ?? [];
+  // For ADMIN: show defined actions. For GESTOR: only allow canceling own PENDENTE
+  const actions = permissions.canChangeStatus
+    ? (STATUS_ACTION[request.status] ?? [])
+    : (permissions.canCancelOwn && request.status === 'PENDENTE' && request.requesterId === user?.id)
+      ? [{ label: 'Cancelar Solicitação', next: 'CANCELADA' as RequestStatus, variant: 'destructive' as const }]
+      : [];
 
   return (
     <Sheet open={!!requestId} onOpenChange={(v) => !v && onClose()}>
