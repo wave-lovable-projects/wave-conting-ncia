@@ -143,6 +143,17 @@ export function useCreateAnnotation() {
   });
 }
 
+export function useUpdateAnnotation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, profileId, content }: { id: string; profileId: string; content: string }) => {
+      setMockAnnotations(getMockAnnotations().map(a => a.id === id ? { ...a, content, createdAt: new Date().toISOString() } : a));
+      return Promise.resolve();
+    },
+    onSuccess: (_d, v) => { qc.invalidateQueries({ queryKey: ['profiles', v.profileId, 'annotations'] }); },
+  });
+}
+
 export function useProfileComments(profileId: string) {
   return useQuery({
     queryKey: ['profiles', profileId, 'comments'],
