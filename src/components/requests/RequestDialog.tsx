@@ -400,18 +400,19 @@ interface SpecFieldsProps {
   form: ReturnType<typeof useForm<FormValues>>;
   bms: ReturnType<typeof getMockBMs>;
   adAccounts: ReturnType<typeof getMockAdAccounts>;
+  portalContainer?: HTMLElement | null;
 }
 
-function SpecFields({ type, form, bms, adAccounts }: SpecFieldsProps) {
+function SpecFields({ type, form, bms, adAccounts, portalContainer }: SpecFieldsProps) {
   switch (type) {
     case 'CONTA_ANUNCIO':
-      return <SpecContaAnuncio form={form} bms={bms} />;
+      return <SpecContaAnuncio form={form} bms={bms} portalContainer={portalContainer} />;
     case 'PERFIL':
       return <SpecPerfil form={form} />;
     case 'BUSINESS_MANAGER':
-      return <SpecBM form={form} />;
+      return <SpecBM form={form} portalContainer={portalContainer} />;
     case 'SALDO':
-      return <SpecSaldo form={form} adAccounts={adAccounts} />;
+      return <SpecSaldo form={form} adAccounts={adAccounts} portalContainer={portalContainer} />;
     default:
       return null;
   }
