@@ -17,6 +17,7 @@ import {
 import type { Request, RequestStatus, RequestType } from '@/types/request';
 import { cn } from '@/lib/utils';
 import type { RequestPermissions } from '@/hooks/useRequestPermissions';
+import { RichTextViewer } from '@/components/shared/RichTextViewer';
 
 const VALID_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
   PENDENTE: ['APROVADA', 'REJEITADA'],
@@ -241,7 +242,7 @@ export function OverviewTab({ request, permissions }: Props) {
       <Separator />
       <div>
         <span className="text-sm font-medium text-foreground">Descrição</span>
-        <p className="text-sm text-muted-foreground mt-1">{request.description}</p>
+        <RichTextViewer content={request.description} />
       </div>
 
       {/* Specifications */}

@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/shared/RichTextEditor';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -341,7 +341,13 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
               <FormField control={form.control} name="description" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Descrição *</FormLabel>
-                  <FormControl><Textarea placeholder="Descreva a solicitação..." rows={3} {...field} /></FormControl>
+                  <FormControl>
+                    <RichTextEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Descreva a solicitação..."
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
