@@ -20,12 +20,6 @@ const STATUS_OPTIONS = [
   { value: 'BLOCKED', label: 'Bloqueado' },
 ];
 
-const SUPPLIER_OPTIONS = [
-  { value: 's1', label: 'Fornecedor Alpha' },
-  { value: 's2', label: 'Fornecedor Beta' },
-  { value: 's3', label: 'Fornecedor Gamma' },
-];
-
 const BM_OPTIONS = [
   { value: 'bm-1', label: 'BM Principal Ads' },
   { value: 'bm-2', label: 'BM Backup 01' },
@@ -94,10 +88,6 @@ export default function Pixels() {
   const handleBulkApply = async (values: Record<string, string>) => {
     const data: Record<string, string> = {};
     if (values.status) data.status = values.status;
-    if (values.supplierId) {
-      data.supplierId = values.supplierId;
-      data.supplierName = SUPPLIER_OPTIONS.find(s => s.value === values.supplierId)?.label || '';
-    }
     if (values.bmId) {
       data.bmId = values.bmId;
       data.bmName = BM_OPTIONS.find(b => b.value === values.bmId)?.label || '';
@@ -109,7 +99,6 @@ export default function Pixels() {
 
   const bulkFields: BulkFieldConfig[] = [
     { key: 'status', label: 'Status', options: STATUS_OPTIONS },
-    { key: 'supplierId', label: 'Fornecedor', options: SUPPLIER_OPTIONS },
     { key: 'bmId', label: 'BM', options: BM_OPTIONS },
   ];
 

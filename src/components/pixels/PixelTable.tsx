@@ -62,10 +62,7 @@ export function PixelTable({ data, total, totalPages, pagination, onPaginationCh
               <TableHead><SortHeader field="name" label="Nome" sortField={sortField} onSort={onSort} /></TableHead>
               <TableHead>Pixel ID</TableHead>
               <TableHead>BM Vinculada</TableHead>
-              <TableHead><SortHeader field="supplierName" label="Fornecedor" sortField={sortField} onSort={onSort} /></TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Domínio</TableHead>
-              <TableHead>Dt. Recebimento</TableHead>
               <TableHead>Dt. Block</TableHead>
               <TableHead>Notas</TableHead>
             </TableRow>
@@ -100,10 +97,7 @@ export function PixelTable({ data, total, totalPages, pagination, onPaginationCh
                   </div>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{p.bmName || '—'}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{p.supplierName || '—'}</TableCell>
                 <TableCell><StatusBadge status={p.status} /></TableCell>
-                <TableCell className="text-sm text-muted-foreground">{p.domain || '—'}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{p.receivedAt ? format(new Date(p.receivedAt), 'dd/MM/yyyy') : '—'}</TableCell>
                 <TableCell className="text-sm text-muted-foreground">{p.blockedAt ? format(new Date(p.blockedAt), 'dd/MM/yyyy') : '—'}</TableCell>
                 <TableCell className="text-sm text-muted-foreground truncate max-w-[120px]">{p.notes || '—'}</TableCell>
               </TableRow>
