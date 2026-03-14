@@ -258,7 +258,7 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
 
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) form.reset(); onOpenChange(v); }}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent ref={sheetRef} className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{initialTemplate ? 'Nova Solicitação (via Template)' : 'Nova Solicitação'}</SheetTitle>
         </SheetHeader>
