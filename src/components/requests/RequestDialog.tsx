@@ -513,6 +513,7 @@ function SpecBM({ form, portalContainer }: { form: any; portalContainer?: HTMLEl
               value={field.value || ''}
               onChange={field.onChange}
               placeholder="Selecionar fornecedor"
+              portalContainer={portalContainer}
             />
           </FormControl>
         </FormItem>
