@@ -70,49 +70,72 @@ function EditableField({ value, onSave, label, mono, type = 'text' }: {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { setDraft(value); }, [value]);
-  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [editing]);
 
   const save = () => {
     setEditing(false);
     if (draft !== value) onSave(draft);
   };
 
-  if (editing) {
-    return (
-      <Input
-        ref={inputRef}
-        value={draft}
-        onChange={e => setDraft(e.target.value)}
-        onBlur={save}
-        onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setDraft(value); setEditing(false); } }}
-        className={cn('h-7 text-sm', mono && 'font-mono')}
-        type={type}
-      />
-    );
-  }
-
   return (
     <div
-      className="group/edit flex items-center gap-1 rounded px-1.5 py-0.5 -mx-1.5 cursor-pointer hover:bg-muted/50 transition-colors min-h-[28px]"
-      onClick={() => setEditing(true)}
+      className="group/edit flex items-center gap-1 rounded px-1.5 py-0.5 -mx-1.5 cursor-text hover:bg-muted/50 transition-colors min-h-[28px]"
+      onClick={() => !editing && setEditing(true)}
     >
-      <span className={cn('text-sm', mono && 'font-mono', !value && 'text-muted-foreground')}>
-        {value || '—'}
-      </span>
-      <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover/edit:opacity-100 transition-opacity shrink-0" />
+      {editing ? (
+        <input
+          ref={inputRef}
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onBlur={save}
+          onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setDraft(value); setEditing(false); } }}
+          type={type}
+          className={cn(
+            'bg-transparent border-none outline-none p-0 w-full text-sm text-foreground',
+            'border-b border-dashed border-primary/40 focus:border-primary',
+            mono && 'font-mono'
+          )}
+        />
+      ) : (
+        <>
+          <span className={cn('text-sm', mono && 'font-mono', !value && 'text-muted-foreground')}>
+            {value || '—'}
+          </span>
+          <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover/edit:opacity-100 transition-opacity shrink-0" />
+        </>
+      )}
     </div>
   );
 }
 
-function EditableSelect({ value, onSave, options }: {
+/* ─── Inline Editable Select ─── */
+function EditableSelect({ value, onSave, options, renderValue }: {
   value: string;
   onSave: (val: string) => void;
   options: { value: string; label: string }[];
+  renderValue?: (val: string) => React.ReactNode;
 }) {
+  const [selectOpen, setSelectOpen] = useState(false);
+  const displayLabel = options.find(o => o.value === value)?.label || value || '—';
+
   return (
-    <Select value={value} onValueChange={onSave}>
-      <SelectTrigger className="h-7 text-sm w-full">
-        <SelectValue />
+    <Select
+      value={value}
+      onValueChange={v => { onSave(v); setSelectOpen(false); }}
+      open={selectOpen}
+      onOpenChange={setSelectOpen}
+    >
+      <SelectTrigger
+        className="h-auto border-none shadow-none bg-transparent hover:bg-muted/50 transition-colors px-1.5 py-0.5 -mx-1.5 gap-1 group/sel focus:ring-0 focus:ring-offset-0 [&>svg]:opacity-0 [&>svg]:group-hover/sel:opacity-100 [&>svg]:transition-opacity"
+      >
+        {renderValue ? renderValue(value) : (
+          <span className={cn('text-sm', !value && 'text-muted-foreground')}>{displayLabel}</span>
+        )}
       </SelectTrigger>
       <SelectContent>
         {options.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
