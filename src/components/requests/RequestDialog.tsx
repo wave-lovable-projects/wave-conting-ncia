@@ -9,18 +9,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { CalendarIcon, Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useCreateRequest, useCreateRequestTemplate } from '@/hooks/useRequests';
 import { toast } from '@/hooks/use-toast';
 import { REQUEST_TYPES, REQUEST_TYPE_LABELS } from '@/types/request';
 import type { RequestType, RequestTemplate } from '@/types/request';
-import { mockNiches, mockSuppliers, getMockAdAccounts } from '@/data/mock-ad-accounts';
+import { mockSuppliers, getMockAdAccounts } from '@/data/mock-ad-accounts';
 import { getMockBMs, bmFunctions } from '@/data/mock-business-managers';
 
 const PRIORITIES = [
@@ -37,16 +38,12 @@ const formSchema = z.object({
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']),
   dueDate: z.date().optional(),
   description: z.string().trim().min(1, 'Descrição é obrigatória'),
-  specNiche: z.string().optional(),
   specCurrency: z.string().optional(),
   specPaymentType: z.string().optional(),
   specBm: z.string().optional(),
   specProxy: z.string().optional(),
-  specWarmingLevel: z.string().optional(),
   specFunction: z.string().optional(),
   specSupplier: z.string().optional(),
-  specHistory: z.boolean().optional(),
-  specDomain: z.string().optional(),
   specDestAccount: z.string().optional(),
   specAmount: z.string().optional(),
   specAmountCurrency: z.string().optional(),
@@ -70,24 +67,66 @@ interface Props {
 
 function applySpecsToForm(type: RequestType, specs: Record<string, string>, form: ReturnType<typeof useForm<FormValues>>) {
   if (type === 'CONTA_ANUNCIO') {
-    if (specs.nicho) form.setValue('specNiche', specs.nicho);
     if (specs.moeda) form.setValue('specCurrency', specs.moeda);
     if (specs.pagamento) form.setValue('specPaymentType', specs.pagamento);
     if (specs.bmDesejada) form.setValue('specBm', specs.bmDesejada);
   } else if (type === 'PERFIL') {
     if (specs.proxy) form.setValue('specProxy', specs.proxy);
-    if (specs.aquecimento) form.setValue('specWarmingLevel', specs.aquecimento);
   } else if (type === 'BUSINESS_MANAGER') {
     if (specs.funcao) form.setValue('specFunction', specs.funcao);
     if (specs.fornecedorPreferido) form.setValue('specSupplier', specs.fornecedorPreferido);
-  } else if (type === 'PAGINA') {
-    if (specs.nicho) form.setValue('specNiche', specs.nicho);
-    if (specs.comHistorico) form.setValue('specHistory', specs.comHistorico === 'Sim');
   } else if (type === 'SALDO') {
     if (specs.contaDestino) form.setValue('specDestAccount', specs.contaDestino);
     if (specs.valor) form.setValue('specAmount', specs.valor);
     if (specs.moeda) form.setValue('specAmountCurrency', specs.moeda);
   }
+}
+
+// --- Combobox Field ---
+interface ComboboxOption {
+  value: string;
+  label: string;
+}
+
+function ComboboxField({ options, value, onChange, placeholder }: {
+  options: ComboboxOption[];
+  value: string;
+  onChange: (val: string) => void;
+  placeholder: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const selectedLabel = options.find((o) => o.value === value)?.label;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between font-normal">
+          {selectedLabel || <span className="text-muted-foreground">{placeholder}</span>}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+        <Command>
+          <CommandInput placeholder={`Buscar...`} />
+          <CommandList>
+            <CommandEmpty>Nenhum resultado.</CommandEmpty>
+            <ScrollArea className="max-h-[200px]">
+              {options.map((opt) => (
+                <CommandItem
+                  key={opt.value}
+                  value={opt.label}
+                  onSelect={() => { onChange(opt.value); setOpen(false); }}
+                >
+                  <Check className={cn("mr-2 h-4 w-4", value === opt.value ? "opacity-100" : "opacity-0")} />
+                  {opt.label}
+                </CommandItem>
+              ))}
+            </ScrollArea>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
 }
 
 export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
@@ -104,7 +143,6 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
       quantity: 1,
       priority: 'MEDIUM',
       description: '',
-      specHistory: false,
       saveAsTemplate: false,
       templateName: '',
     },
@@ -113,7 +151,6 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
   const watchAssetType = form.watch('assetType') as RequestType;
   const watchSaveAsTemplate = form.watch('saveAsTemplate');
 
-  // Apply template when provided
   useEffect(() => {
     if (initialTemplate && open) {
       form.reset({
@@ -122,30 +159,23 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
         quantity: initialTemplate.quantity,
         priority: initialTemplate.priority,
         description: initialTemplate.description || '',
-        specHistory: false,
         saveAsTemplate: false,
         templateName: '',
       });
-      // Apply specs after a tick so the asset type is set
       setTimeout(() => {
         applySpecsToForm(initialTemplate.assetType, initialTemplate.specifications, form);
       }, 0);
     }
   }, [initialTemplate, open, form]);
 
-  // Reset spec fields when asset type changes (only if no template being applied)
   useEffect(() => {
     if (!initialTemplate) {
-      form.setValue('specNiche', '');
       form.setValue('specCurrency', '');
       form.setValue('specPaymentType', '');
       form.setValue('specBm', '');
       form.setValue('specProxy', '');
-      form.setValue('specWarmingLevel', '');
       form.setValue('specFunction', '');
       form.setValue('specSupplier', '');
-      form.setValue('specHistory', false);
-      form.setValue('specDomain', '');
       form.setValue('specDestAccount', '');
       form.setValue('specAmount', '');
       form.setValue('specAmountCurrency', 'BRL');
@@ -157,24 +187,19 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
     const specs: Record<string, string> = {};
     const t = values.assetType;
     if (t === 'CONTA_ANUNCIO') {
-      if (values.specNiche) specs.nicho = values.specNiche;
       if (values.specCurrency) specs.moeda = values.specCurrency;
       if (values.specPaymentType) specs.pagamento = values.specPaymentType;
       if (values.specBm) specs.bmDesejada = values.specBm;
     } else if (t === 'PERFIL') {
       if (values.specProxy) specs.proxy = values.specProxy;
-      if (values.specWarmingLevel) specs.aquecimento = values.specWarmingLevel;
     } else if (t === 'BUSINESS_MANAGER') {
       if (values.specFunction) specs.funcao = values.specFunction;
       if (values.specSupplier) specs.fornecedorPreferido = values.specSupplier;
-    } else if (t === 'PAGINA') {
-      if (values.specNiche) specs.nicho = values.specNiche;
-      specs.comHistorico = values.specHistory ? 'Sim' : 'Não';
     } else if (t === 'SALDO') {
       if (values.specDestAccount) specs.contaDestino = values.specDestAccount;
       if (values.specAmount) specs.valor = values.specAmount;
       if (values.specAmountCurrency) specs.moeda = values.specAmountCurrency;
-  }
+    }
     return specs;
   }
 
@@ -195,7 +220,6 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
         specifications,
       });
 
-      // Save as template if checked
       if (values.saveAsTemplate && values.templateName) {
         try {
           await createTemplateMutation.mutateAsync({
@@ -316,11 +340,13 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
             </div>
 
             {/* Section: Especificações do Ativo */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-foreground">Especificações do Ativo</h3>
-              <Separator />
-              <SpecFields type={watchAssetType} form={form} bms={bms} adAccounts={adAccounts} />
-            </div>
+            {watchAssetType !== 'PAGINA' && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-foreground">Especificações do Ativo</h3>
+                <Separator />
+                <SpecFields type={watchAssetType} form={form} bms={bms} adAccounts={adAccounts} />
+              </div>
+            )}
 
             {/* Section: Salvar como Template */}
             <div className="space-y-3">
@@ -376,8 +402,6 @@ function SpecFields({ type, form, bms, adAccounts }: SpecFieldsProps) {
       return <SpecPerfil form={form} />;
     case 'BUSINESS_MANAGER':
       return <SpecBM form={form} />;
-    case 'PAGINA':
-      return <SpecPagina form={form} />;
     case 'SALDO':
       return <SpecSaldo form={form} adAccounts={adAccounts} />;
     default:
@@ -386,19 +410,13 @@ function SpecFields({ type, form, bms, adAccounts }: SpecFieldsProps) {
 }
 
 function SpecContaAnuncio({ form, bms }: { form: any; bms: any[] }) {
+  const bmOptions: ComboboxOption[] = bms.map((bm) => ({
+    value: bm.name,
+    label: `${bm.name} (${bm.bmId})`,
+  }));
+
   return (
     <div className="space-y-4">
-      <FormField control={form.control} name="specNiche" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Nicho Desejado</FormLabel>
-          <Select value={field.value || ''} onValueChange={field.onChange}>
-            <FormControl><SelectTrigger><SelectValue placeholder="Selecionar nicho" /></SelectTrigger></FormControl>
-            <SelectContent>
-              {mockNiches.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </FormItem>
-      )} />
       <div className="grid grid-cols-2 gap-4">
         <FormField control={form.control} name="specCurrency" render={({ field }) => (
           <FormItem>
@@ -408,6 +426,7 @@ function SpecContaAnuncio({ form, bms }: { form: any; bms: any[] }) {
               <SelectContent>
                 <SelectItem value="BRL">BRL</SelectItem>
                 <SelectItem value="USD">USD</SelectItem>
+                <SelectItem value="INDIFERENTE">Indiferente</SelectItem>
               </SelectContent>
             </Select>
           </FormItem>
@@ -420,6 +439,7 @@ function SpecContaAnuncio({ form, bms }: { form: any; bms: any[] }) {
               <SelectContent>
                 <SelectItem value="Cartão">Cartão</SelectItem>
                 <SelectItem value="Agência">Agência</SelectItem>
+                <SelectItem value="Indiferente">Indiferente</SelectItem>
               </SelectContent>
             </Select>
           </FormItem>
@@ -428,12 +448,14 @@ function SpecContaAnuncio({ form, bms }: { form: any; bms: any[] }) {
       <FormField control={form.control} name="specBm" render={({ field }) => (
         <FormItem>
           <FormLabel>BM Desejada (opcional)</FormLabel>
-          <Select value={field.value || ''} onValueChange={field.onChange}>
-            <FormControl><SelectTrigger><SelectValue placeholder="Selecionar BM" /></SelectTrigger></FormControl>
-            <SelectContent>
-              {bms.map((bm) => <SelectItem key={bm.id} value={bm.name}>{bm.name} ({bm.bmId})</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <FormControl>
+            <ComboboxField
+              options={bmOptions}
+              value={field.value || ''}
+              onChange={field.onChange}
+              placeholder="Selecionar BM"
+            />
+          </FormControl>
         </FormItem>
       )} />
     </div>
@@ -445,21 +467,8 @@ function SpecPerfil({ form }: { form: any }) {
     <div className="space-y-4">
       <FormField control={form.control} name="specProxy" render={({ field }) => (
         <FormItem>
-          <FormLabel>Tipo de Proxy Necessário</FormLabel>
+          <FormLabel>Tipo de Proxy Necessário (opcional)</FormLabel>
           <FormControl><Input placeholder="Ex: Residencial BR, Mobile US..." {...field} /></FormControl>
-        </FormItem>
-      )} />
-      <FormField control={form.control} name="specWarmingLevel" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Nível de Aquecimento</FormLabel>
-          <Select value={field.value || ''} onValueChange={field.onChange}>
-            <FormControl><SelectTrigger><SelectValue placeholder="Selecionar nível" /></SelectTrigger></FormControl>
-            <SelectContent>
-              <SelectItem value="Novo">Novo</SelectItem>
-              <SelectItem value="Parcialmente aquecido">Parcialmente aquecido</SelectItem>
-              <SelectItem value="Totalmente aquecido">Totalmente aquecido</SelectItem>
-            </SelectContent>
-          </Select>
         </FormItem>
       )} />
     </div>
@@ -467,11 +476,16 @@ function SpecPerfil({ form }: { form: any }) {
 }
 
 function SpecBM({ form }: { form: any }) {
+  const supplierOptions: ComboboxOption[] = mockSuppliers.map((s) => ({
+    value: s.name,
+    label: s.name,
+  }));
+
   return (
     <div className="space-y-4">
       <FormField control={form.control} name="specFunction" render={({ field }) => (
         <FormItem>
-          <FormLabel>Função Desejada</FormLabel>
+          <FormLabel>Função Desejada (opcional)</FormLabel>
           <Select value={field.value || ''} onValueChange={field.onChange}>
             <FormControl><SelectTrigger><SelectValue placeholder="Selecionar função" /></SelectTrigger></FormControl>
             <SelectContent>
@@ -483,37 +497,13 @@ function SpecBM({ form }: { form: any }) {
       <FormField control={form.control} name="specSupplier" render={({ field }) => (
         <FormItem>
           <FormLabel>Fornecedor Preferido (opcional)</FormLabel>
-          <Select value={field.value || ''} onValueChange={field.onChange}>
-            <FormControl><SelectTrigger><SelectValue placeholder="Selecionar fornecedor" /></SelectTrigger></FormControl>
-            <SelectContent>
-              {mockSuppliers.map((s) => <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </FormItem>
-      )} />
-    </div>
-  );
-}
-
-function SpecPagina({ form }: { form: any }) {
-  return (
-    <div className="space-y-4">
-      <FormField control={form.control} name="specNiche" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Nicho</FormLabel>
-          <Select value={field.value || ''} onValueChange={field.onChange}>
-            <FormControl><SelectTrigger><SelectValue placeholder="Selecionar nicho" /></SelectTrigger></FormControl>
-            <SelectContent>
-              {mockNiches.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </FormItem>
-      )} />
-      <FormField control={form.control} name="specHistory" render={({ field }) => (
-        <FormItem className="flex items-center justify-between rounded-lg border border-border p-3">
-          <FormLabel className="text-sm font-normal">Com histórico de publicações</FormLabel>
           <FormControl>
-            <Switch checked={field.value} onCheckedChange={field.onChange} />
+            <ComboboxField
+              options={supplierOptions}
+              value={field.value || ''}
+              onChange={field.onChange}
+              placeholder="Selecionar fornecedor"
+            />
           </FormControl>
         </FormItem>
       )} />
@@ -521,21 +511,25 @@ function SpecPagina({ form }: { form: any }) {
   );
 }
 
-
-
-
 function SpecSaldo({ form, adAccounts }: { form: any; adAccounts: any[] }) {
+  const accountOptions: ComboboxOption[] = adAccounts.map((a) => ({
+    value: a.name,
+    label: `${a.name} (${a.accountId})`,
+  }));
+
   return (
     <div className="space-y-4">
       <FormField control={form.control} name="specDestAccount" render={({ field }) => (
         <FormItem>
           <FormLabel>Conta de Destino</FormLabel>
-          <Select value={field.value || ''} onValueChange={field.onChange}>
-            <FormControl><SelectTrigger><SelectValue placeholder="Selecionar conta" /></SelectTrigger></FormControl>
-            <SelectContent>
-              {adAccounts.map((a) => <SelectItem key={a.id} value={a.name}>{a.name} ({a.accountId})</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <FormControl>
+            <ComboboxField
+              options={accountOptions}
+              value={field.value || ''}
+              onChange={field.onChange}
+              placeholder="Selecionar conta"
+            />
+          </FormControl>
         </FormItem>
       )} />
       <div className="grid grid-cols-2 gap-4">
