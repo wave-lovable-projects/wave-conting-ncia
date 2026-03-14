@@ -99,7 +99,6 @@ export default function Pixels() {
 
   const bulkFields: BulkFieldConfig[] = [
     { key: 'status', label: 'Status', options: STATUS_OPTIONS },
-    { key: 'supplierId', label: 'Fornecedor', options: SUPPLIER_OPTIONS },
     { key: 'bmId', label: 'BM', options: BM_OPTIONS },
   ];
 

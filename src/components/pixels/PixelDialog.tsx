@@ -1,10 +1,13 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandInput, CommandList, CommandEmpty, CommandItem } from '@/components/ui/command';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,21 +15,13 @@ import { useCreatePixel, useUpdatePixel } from '@/hooks/usePixels';
 import { getMockBMs } from '@/data/mock-business-managers';
 import type { Pixel } from '@/types/pixel';
 import { toast } from '@/hooks/use-toast';
-
-const mockSuppliers = [
-  { id: 's1', name: 'Fornecedor Alpha' },
-  { id: 's2', name: 'Fornecedor Beta' },
-  { id: 's3', name: 'Fornecedor Gamma' },
-];
+import { cn } from '@/lib/utils';
 
 const schema = z.object({
   name: z.string().min(1, 'Nome obrigatório'),
   pixelId: z.string().min(1, 'Pixel ID obrigatório'),
   bmId: z.string().optional(),
-  supplierId: z.string().optional(),
   status: z.enum(['ACTIVE', 'DISABLED', 'BLOCKED']),
-  domain: z.string().optional(),
-  receivedAt: z.string().optional(),
   blockedAt: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -44,6 +39,7 @@ export function PixelDialog({ open, onOpenChange, pixel }: PixelDialogProps) {
   const updatePixel = useUpdatePixel();
   const isEditing = !!pixel;
   const bms = getMockBMs();
+  const [bmOpen, setBmOpen] = useState(false);
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -53,15 +49,14 @@ export function PixelDialog({ open, onOpenChange, pixel }: PixelDialogProps) {
   useEffect(() => {
     if (open) {
       if (pixel) {
-        reset({ name: pixel.name, pixelId: pixel.pixelId, bmId: pixel.bmId || '', supplierId: pixel.supplierId || '', status: pixel.status, domain: pixel.domain || '', receivedAt: pixel.receivedAt || '', blockedAt: pixel.blockedAt || '', notes: pixel.notes || '' });
+        reset({ name: pixel.name, pixelId: pixel.pixelId, bmId: pixel.bmId || '', status: pixel.status, blockedAt: pixel.blockedAt || '', notes: pixel.notes || '' });
       } else {
-        reset({ name: '', pixelId: '', bmId: '', supplierId: '', status: 'ACTIVE', domain: '', receivedAt: '', blockedAt: '', notes: '' });
+        reset({ name: '', pixelId: '', bmId: '', status: 'ACTIVE', blockedAt: '', notes: '' });
       }
     }
   }, [open, pixel, reset]);
 
   const onSubmit = async (values: FormValues) => {
-    const supplier = mockSuppliers.find(s => s.id === values.supplierId);
     const bm = bms.find(b => b.id === values.bmId);
     const payload = {
       name: values.name,
@@ -69,10 +64,6 @@ export function PixelDialog({ open, onOpenChange, pixel }: PixelDialogProps) {
       status: values.status as Pixel['status'],
       bmId: values.bmId || undefined,
       bmName: bm?.name,
-      supplierId: values.supplierId || undefined,
-      supplierName: supplier?.name,
-      domain: values.domain || undefined,
-      receivedAt: values.receivedAt || undefined,
       blockedAt: values.blockedAt || undefined,
       notes: values.notes || undefined,
     };
@@ -96,20 +87,35 @@ export function PixelDialog({ open, onOpenChange, pixel }: PixelDialogProps) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-6">
           <div><Label>Nome *</Label><Input {...register('name')} />{errors.name && <p className="text-xs text-destructive mt-1">{errors.name.message}</p>}</div>
           <div><Label>Pixel ID *</Label><Input {...register('pixelId')} />{errors.pixelId && <p className="text-xs text-destructive mt-1">{errors.pixelId.message}</p>}</div>
-          <div><Label>BM Vinculada</Label>
+          <div>
+            <Label>BM Vinculada</Label>
             <Controller name="bmId" control={control} render={({ field }) => (
-              <Select value={field.value || 'NONE'} onValueChange={v => field.onChange(v === 'NONE' ? '' : v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="NONE">Nenhuma</SelectItem>{bms.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}</SelectContent>
-              </Select>
-            )} />
-          </div>
-          <div><Label>Fornecedor</Label>
-            <Controller name="supplierId" control={control} render={({ field }) => (
-              <Select value={field.value || 'NONE'} onValueChange={v => field.onChange(v === 'NONE' ? '' : v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent><SelectItem value="NONE">Nenhum</SelectItem>{mockSuppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
-              </Select>
+              <Popover open={bmOpen} onOpenChange={setBmOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" role="combobox" aria-expanded={bmOpen} className="w-full justify-between font-normal">
+                    {field.value ? bms.find(b => b.id === field.value)?.name || 'Selecionar BM...' : 'Selecionar BM...'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Buscar BM..." />
+                    <CommandList>
+                      <CommandEmpty>Nenhuma BM encontrada.</CommandEmpty>
+                      <CommandItem value="__none__" onSelect={() => { field.onChange(''); setBmOpen(false); }}>
+                        <Check className={cn("mr-2 h-4 w-4", !field.value ? "opacity-100" : "opacity-0")} />
+                        Nenhuma
+                      </CommandItem>
+                      {bms.map(b => (
+                        <CommandItem key={b.id} value={b.name} onSelect={() => { field.onChange(b.id); setBmOpen(false); }}>
+                          <Check className={cn("mr-2 h-4 w-4", field.value === b.id ? "opacity-100" : "opacity-0")} />
+                          {b.name}
+                        </CommandItem>
+                      ))}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             )} />
           </div>
           <div><Label>Status *</Label>
@@ -120,8 +126,6 @@ export function PixelDialog({ open, onOpenChange, pixel }: PixelDialogProps) {
               </Select>
             )} />
           </div>
-          <div><Label>Domínio</Label><Input {...register('domain')} placeholder="exemplo.com" /></div>
-          <div><Label>Data de Recebimento</Label><Input type="date" {...register('receivedAt')} /></div>
           <div><Label>Data de Block</Label><Input type="date" {...register('blockedAt')} /></div>
           <div><Label>Notas</Label><Textarea {...register('notes')} /></div>
           <div className="flex justify-end gap-2 pt-4">

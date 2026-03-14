@@ -6,12 +6,6 @@ import type { FilterCategory } from '@/components/shared/UnifiedFilter';
 import type { PixelFilters } from '@/types/pixel';
 import { getMockBMs } from '@/data/mock-business-managers';
 
-const mockSuppliers = [
-  { id: 's1', name: 'Fornecedor Alpha' },
-  { id: 's2', name: 'Fornecedor Beta' },
-  { id: 's3', name: 'Fornecedor Gamma' },
-];
-
 interface PixelFiltersBarProps {
   filters: PixelFilters;
   searchValue: string;
@@ -20,7 +14,7 @@ interface PixelFiltersBarProps {
   onClear: () => void;
 }
 
-const FILTER_KEYS = ['status', 'supplierId', 'bmId'] as const;
+const FILTER_KEYS = ['status', 'bmId'] as const;
 
 export function PixelFiltersBar({ filters, searchValue, onSearchChange, onFilterChange, onClear }: PixelFiltersBarProps) {
   const bms = getMockBMs();
@@ -31,7 +25,6 @@ export function PixelFiltersBar({ filters, searchValue, onSearchChange, onFilter
       { value: 'DISABLED', label: 'Desativado' },
       { value: 'BLOCKED', label: 'Bloqueado' },
     ]},
-    { key: 'supplierId', label: 'Fornecedor', options: mockSuppliers.map((s) => ({ value: s.id, label: s.name })) },
     { key: 'bmId', label: 'BM Vinculada', options: bms.map((b) => ({ value: b.id, label: b.name })) },
   ], [bms]);
 
