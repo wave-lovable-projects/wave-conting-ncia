@@ -241,7 +241,7 @@ export function OverviewTab({ request, permissions }: Props) {
       <Separator />
       <div>
         <span className="text-sm font-medium text-foreground">Descrição</span>
-        <p className="text-sm text-muted-foreground mt-1">{request.description}</p>
+        <RichTextViewer content={request.description} />
       </div>
 
       {/* Specifications */}
