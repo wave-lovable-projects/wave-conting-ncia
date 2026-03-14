@@ -13,7 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { CalendarIcon, Check, ChevronsUpDown, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -108,20 +108,18 @@ function ComboboxField({ options, value, onChange, placeholder }: {
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command>
           <CommandInput placeholder={`Buscar...`} />
-          <CommandList>
+          <CommandList className="max-h-[200px]">
             <CommandEmpty>Nenhum resultado.</CommandEmpty>
-            <ScrollArea className="max-h-[200px]">
-              {options.map((opt) => (
-                <CommandItem
-                  key={opt.value}
-                  value={opt.label}
-                  onSelect={() => { onChange(opt.value); setOpen(false); }}
-                >
-                  <Check className={cn("mr-2 h-4 w-4", value === opt.value ? "opacity-100" : "opacity-0")} />
-                  {opt.label}
-                </CommandItem>
-              ))}
-            </ScrollArea>
+            {options.map((opt) => (
+              <CommandItem
+                key={opt.value}
+                value={opt.label}
+                onSelect={() => { onChange(opt.value); setOpen(false); }}
+              >
+                <Check className={cn("mr-2 h-4 w-4", value === opt.value ? "opacity-100" : "opacity-0")} />
+                {opt.label}
+              </CommandItem>
+            ))}
           </CommandList>
         </Command>
       </PopoverContent>
