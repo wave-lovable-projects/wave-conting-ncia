@@ -352,7 +352,7 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-foreground">Especificações do Ativo</h3>
                 <Separator />
-                <SpecFields type={watchAssetType} form={form} bms={bms} adAccounts={adAccounts} />
+                <SpecFields type={watchAssetType} form={form} bms={bms} adAccounts={adAccounts} portalContainer={sheetRef.current} />
               </div>
             )}
 
