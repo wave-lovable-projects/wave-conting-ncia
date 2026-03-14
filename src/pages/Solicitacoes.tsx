@@ -6,9 +6,23 @@ import { RequestTable } from '@/components/requests/RequestTable';
 import { RequestKanbanBoard } from '@/components/requests/RequestKanbanBoard';
 import { RequestDialog } from '@/components/requests/RequestDialog';
 import { RequestDetailSheet } from '@/components/requests/RequestDetailSheet';
-import { useRequests } from '@/hooks/useRequests';
-import type { RequestFilters } from '@/types/request';
+import { useRequests, useUpdateRequestStatus } from '@/hooks/useRequests';
+import { useUIStore } from '@/store/ui.store';
+import type { RequestFilters, Request, RequestStatus } from '@/types/request';
 import { Plus, List, Columns3 } from 'lucide-react';
+import { toast } from 'sonner';
+
+const VALID_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
+  PENDENTE: ['APROVADA', 'REJEITADA'],
+  APROVADA: ['SOLICITADA_FORNECEDOR', 'REJEITADA', 'CANCELADA'],
+  SOLICITADA_FORNECEDOR: ['RECEBIDA', 'CANCELADA'],
+  RECEBIDA: ['EM_AQUECIMENTO', 'CANCELADA'],
+  EM_AQUECIMENTO: ['PRONTA', 'CANCELADA'],
+  PRONTA: ['ENTREGUE', 'CANCELADA'],
+  ENTREGUE: [],
+  REJEITADA: [],
+  CANCELADA: [],
+};
 
 export default function Solicitacoes() {
   const [view, setView] = useState<'list' | 'kanban'>('list');
@@ -17,6 +31,31 @@ export default function Solicitacoes() {
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
 
   const { data: requests } = useRequests(filters);
+  const updateStatus = useUpdateRequestStatus();
+  const user = useUIStore((s) => s.user);
+
+  const handleAdvanceStatus = (r: Request) => {
+    const nextStatuses = VALID_TRANSITIONS[r.status] ?? [];
+    const next = nextStatuses.find((s) => s !== 'REJEITADA' && s !== 'CANCELADA');
+    if (!next) return;
+    updateStatus.mutate(
+      { id: r.id, status: next, changedBy: user?.name ?? 'Sistema' },
+      {
+        onSuccess: () => toast.success('Status atualizado com sucesso'),
+        onError: () => toast.error('Erro ao atualizar status'),
+      }
+    );
+  };
+
+  const handleCancel = (r: Request) => {
+    updateStatus.mutate(
+      { id: r.id, status: 'CANCELADA', changedBy: user?.name ?? 'Sistema' },
+      {
+        onSuccess: () => toast.success('Solicitação cancelada'),
+        onError: () => toast.error('Erro ao cancelar solicitação'),
+      }
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -55,7 +94,8 @@ export default function Solicitacoes() {
         <RequestTable
           requests={requests ?? []}
           onView={(r) => setSelectedRequestId(r.id)}
-          onEdit={(r) => setSelectedRequestId(r.id)}
+          onAdvanceStatus={handleAdvanceStatus}
+          onCancel={handleCancel}
         />
       ) : (
         <RequestKanbanBoard requests={requests ?? []} onCardClick={(r) => setSelectedRequestId(r.id)} />

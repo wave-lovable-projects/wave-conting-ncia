@@ -111,4 +111,6 @@ export interface RequestFilters {
   requesterId?: string;
   assigneeId?: string;
   supplierId?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }
