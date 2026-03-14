@@ -12,6 +12,7 @@ import { format, differenceInDays } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
+import type { RequestPermissions } from '@/hooks/useRequestPermissions';
 
 const assetTypeIcon: Record<RequestType, LucideIcon> = {
   CONTA_ANUNCIO: CreditCard,
