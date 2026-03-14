@@ -90,6 +90,7 @@ function KanbanColumn({
 interface Props {
   requests: Request[];
   onCardClick: (r: Request) => void;
+  permissions?: RequestPermissions;
 }
 
 export function RequestKanbanBoard({ requests, onCardClick }: Props) {
