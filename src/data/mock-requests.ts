@@ -190,3 +190,49 @@ let mockRequests: Request[] = [
 
 export const getMockRequests = () => [...mockRequests];
 export const setMockRequests = (r: Request[]) => { mockRequests = r; };
+
+// --- Templates ---
+
+import type { RequestTemplate } from '@/types/request';
+
+let mockTemplates: RequestTemplate[] = [
+  {
+    id: 'tpl1', name: '5 Contas Ecommerce BRL Cartão', description: 'Contas para campanhas de e-commerce no Brasil',
+    assetType: 'CONTA_ANUNCIO', quantity: 5, priority: 'HIGH',
+    specifications: { nicho: 'E-commerce', moeda: 'BRL', pagamento: 'Cartão' },
+    createdByName: 'Admin Wave', createdAt: '2025-02-01T10:00:00Z',
+  },
+  {
+    id: 'tpl2', name: '3 Perfis Aquecidos com Proxy', description: 'Perfis com proxy residencial BR já aquecidos',
+    assetType: 'PERFIL', quantity: 3, priority: 'MEDIUM',
+    specifications: { proxy: 'BR Residencial', aquecimento: 'Totalmente aquecido' },
+    createdByName: 'Admin Wave', createdAt: '2025-02-05T10:00:00Z',
+  },
+  {
+    id: 'tpl3', name: '1 BM para Anúncios', description: 'Business Manager padrão para veiculação de anúncios',
+    assetType: 'BUSINESS_MANAGER', quantity: 1, priority: 'MEDIUM',
+    specifications: { funcao: 'Anúncios' },
+    createdByName: 'Admin Wave', createdAt: '2025-02-10T10:00:00Z',
+  },
+  {
+    id: 'tpl4', name: '10 Contas Infoprodutos USD', description: 'Contas para nichos de infoprodutos em dólar',
+    assetType: 'CONTA_ANUNCIO', quantity: 10, priority: 'HIGH',
+    specifications: { nicho: 'Infoprodutos', moeda: 'USD', pagamento: 'Agência' },
+    createdByName: 'Carlos Silva', createdAt: '2025-02-15T10:00:00Z',
+  },
+  {
+    id: 'tpl5', name: '2 Páginas com Histórico', description: 'Páginas com histórico de publicações para campanhas',
+    assetType: 'PAGINA', quantity: 2, priority: 'LOW',
+    specifications: { nicho: 'Beleza', comHistorico: 'Sim' },
+    createdByName: 'Ana Oliveira', createdAt: '2025-02-20T10:00:00Z',
+  },
+  {
+    id: 'tpl6', name: 'Recarga de Saldo R$ 500', description: 'Recarga padrão de R$ 500 em BRL',
+    assetType: 'SALDO', quantity: 1, priority: 'URGENT',
+    specifications: { valor: '500', moeda: 'BRL' },
+    createdByName: 'Admin Wave', createdAt: '2025-02-25T10:00:00Z',
+  },
+];
+
+export const getMockRequestTemplates = () => [...mockTemplates];
+export const setMockRequestTemplates = (t: RequestTemplate[]) => { mockTemplates = t; };

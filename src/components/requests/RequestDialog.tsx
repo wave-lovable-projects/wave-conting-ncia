@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,14 +11,15 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { CalendarIcon, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { useCreateRequest } from '@/hooks/useRequests';
+import { useCreateRequest, useCreateRequestTemplate } from '@/hooks/useRequests';
 import { toast } from '@/hooks/use-toast';
 import { REQUEST_TYPES, REQUEST_TYPE_LABELS } from '@/types/request';
-import type { RequestType } from '@/types/request';
+import type { RequestType, RequestTemplate } from '@/types/request';
 import { mockNiches, mockSuppliers, getMockAdAccounts } from '@/data/mock-ad-accounts';
 import { getMockBMs, bmFunctions } from '@/data/mock-business-managers';
 
@@ -36,7 +37,6 @@ const formSchema = z.object({
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']),
   dueDate: z.date().optional(),
   description: z.string().trim().min(1, 'Descrição é obrigatória'),
-  // Specification fields (all optional, validated contextually)
   specNiche: z.string().optional(),
   specCurrency: z.string().optional(),
   specPaymentType: z.string().optional(),
@@ -51,17 +51,53 @@ const formSchema = z.object({
   specAmount: z.string().optional(),
   specAmountCurrency: z.string().optional(),
   specDetails: z.string().optional(),
-});
+  saveAsTemplate: z.boolean().optional(),
+  templateName: z.string().optional(),
+}).refine((data) => {
+  if (data.saveAsTemplate && (!data.templateName || data.templateName.trim().length === 0)) {
+    return false;
+  }
+  return true;
+}, { message: 'Nome do template é obrigatório', path: ['templateName'] });
 
 type FormValues = z.infer<typeof formSchema>;
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialTemplate?: RequestTemplate | null;
 }
 
-export function RequestDialog({ open, onOpenChange }: Props) {
+function applySpecsToForm(type: RequestType, specs: Record<string, string>, form: ReturnType<typeof useForm<FormValues>>) {
+  if (type === 'CONTA_ANUNCIO') {
+    if (specs.nicho) form.setValue('specNiche', specs.nicho);
+    if (specs.moeda) form.setValue('specCurrency', specs.moeda);
+    if (specs.pagamento) form.setValue('specPaymentType', specs.pagamento);
+    if (specs.bmDesejada) form.setValue('specBm', specs.bmDesejada);
+  } else if (type === 'PERFIL') {
+    if (specs.proxy) form.setValue('specProxy', specs.proxy);
+    if (specs.aquecimento) form.setValue('specWarmingLevel', specs.aquecimento);
+  } else if (type === 'BUSINESS_MANAGER') {
+    if (specs.funcao) form.setValue('specFunction', specs.funcao);
+    if (specs.fornecedorPreferido) form.setValue('specSupplier', specs.fornecedorPreferido);
+  } else if (type === 'PAGINA') {
+    if (specs.nicho) form.setValue('specNiche', specs.nicho);
+    if (specs.comHistorico) form.setValue('specHistory', specs.comHistorico === 'Sim');
+  } else if (type === 'PIXEL') {
+    if (specs.dominio) form.setValue('specDomain', specs.dominio);
+    if (specs.bmDesejada) form.setValue('specBm', specs.bmDesejada);
+  } else if (type === 'SALDO') {
+    if (specs.contaDestino) form.setValue('specDestAccount', specs.contaDestino);
+    if (specs.valor) form.setValue('specAmount', specs.valor);
+    if (specs.moeda) form.setValue('specAmountCurrency', specs.moeda);
+  } else if (type === 'MISTO') {
+    if (specs.detalhes) form.setValue('specDetails', specs.detalhes);
+  }
+}
+
+export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
   const createMutation = useCreateRequest();
+  const createTemplateMutation = useCreateRequestTemplate();
   const bms = getMockBMs();
   const adAccounts = getMockAdAccounts();
 
@@ -74,28 +110,53 @@ export function RequestDialog({ open, onOpenChange }: Props) {
       priority: 'MEDIUM',
       description: '',
       specHistory: false,
+      saveAsTemplate: false,
+      templateName: '',
     },
   });
 
   const watchAssetType = form.watch('assetType') as RequestType;
+  const watchSaveAsTemplate = form.watch('saveAsTemplate');
 
-  // Reset spec fields when asset type changes
+  // Apply template when provided
   useEffect(() => {
-    form.setValue('specNiche', '');
-    form.setValue('specCurrency', '');
-    form.setValue('specPaymentType', '');
-    form.setValue('specBm', '');
-    form.setValue('specProxy', '');
-    form.setValue('specWarmingLevel', '');
-    form.setValue('specFunction', '');
-    form.setValue('specSupplier', '');
-    form.setValue('specHistory', false);
-    form.setValue('specDomain', '');
-    form.setValue('specDestAccount', '');
-    form.setValue('specAmount', '');
-    form.setValue('specAmountCurrency', 'BRL');
-    form.setValue('specDetails', '');
-  }, [watchAssetType, form]);
+    if (initialTemplate && open) {
+      form.reset({
+        title: initialTemplate.name,
+        assetType: initialTemplate.assetType,
+        quantity: initialTemplate.quantity,
+        priority: initialTemplate.priority,
+        description: initialTemplate.description || '',
+        specHistory: false,
+        saveAsTemplate: false,
+        templateName: '',
+      });
+      // Apply specs after a tick so the asset type is set
+      setTimeout(() => {
+        applySpecsToForm(initialTemplate.assetType, initialTemplate.specifications, form);
+      }, 0);
+    }
+  }, [initialTemplate, open, form]);
+
+  // Reset spec fields when asset type changes (only if no template being applied)
+  useEffect(() => {
+    if (!initialTemplate) {
+      form.setValue('specNiche', '');
+      form.setValue('specCurrency', '');
+      form.setValue('specPaymentType', '');
+      form.setValue('specBm', '');
+      form.setValue('specProxy', '');
+      form.setValue('specWarmingLevel', '');
+      form.setValue('specFunction', '');
+      form.setValue('specSupplier', '');
+      form.setValue('specHistory', false);
+      form.setValue('specDomain', '');
+      form.setValue('specDestAccount', '');
+      form.setValue('specAmount', '');
+      form.setValue('specAmountCurrency', 'BRL');
+      form.setValue('specDetails', '');
+    }
+  }, [watchAssetType, form, initialTemplate]);
 
   function buildSpecifications(values: FormValues): Record<string, string> {
     const specs: Record<string, string> = {};
@@ -143,7 +204,27 @@ export function RequestDialog({ open, onOpenChange }: Props) {
         dueDate: values.dueDate?.toISOString(),
         specifications,
       });
-      toast({ title: 'Solicitação criada com sucesso' });
+
+      // Save as template if checked
+      if (values.saveAsTemplate && values.templateName) {
+        try {
+          await createTemplateMutation.mutateAsync({
+            name: values.templateName.trim(),
+            description: values.description,
+            assetType: values.assetType as RequestType,
+            quantity: values.quantity,
+            priority: values.priority as any,
+            specifications,
+            createdByName: 'Admin Wave',
+          });
+          toast({ title: 'Solicitação criada e template salvo com sucesso' });
+        } catch {
+          toast({ title: 'Solicitação criada, mas erro ao salvar template', variant: 'destructive' });
+        }
+      } else {
+        toast({ title: 'Solicitação criada com sucesso' });
+      }
+
       form.reset();
       onOpenChange(false);
     } catch {
@@ -151,11 +232,13 @@ export function RequestDialog({ open, onOpenChange }: Props) {
     }
   }
 
+  const isPending = createMutation.isPending || createTemplateMutation.isPending;
+
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) form.reset(); onOpenChange(v); }}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Nova Solicitação</SheetTitle>
+          <SheetTitle>{initialTemplate ? 'Nova Solicitação (via Template)' : 'Nova Solicitação'}</SheetTitle>
         </SheetHeader>
 
         <Form {...form}>
@@ -249,11 +332,33 @@ export function RequestDialog({ open, onOpenChange }: Props) {
               <SpecFields type={watchAssetType} form={form} bms={bms} adAccounts={adAccounts} />
             </div>
 
+            {/* Section: Salvar como Template */}
+            <div className="space-y-3">
+              <Separator />
+              <FormField control={form.control} name="saveAsTemplate" render={({ field }) => (
+                <FormItem className="flex items-center gap-2">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <FormLabel className="text-sm font-normal !mt-0 cursor-pointer">Salvar como template para uso futuro</FormLabel>
+                </FormItem>
+              )} />
+              {watchSaveAsTemplate && (
+                <FormField control={form.control} name="templateName" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome do Template *</FormLabel>
+                    <FormControl><Input placeholder="Ex: 5 Contas Ecommerce BRL Cartão" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              )}
+            </div>
+
             {/* Actions */}
             <div className="flex gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">Cancelar</Button>
-              <Button type="submit" disabled={createMutation.isPending} className="flex-1">
-                {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button type="submit" disabled={isPending} className="flex-1">
+                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Criar Solicitação
               </Button>
             </div>

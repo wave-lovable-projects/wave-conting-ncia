@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Request, RequestFilters, RequestComment, RequestStatusChange, RequestStatus } from '@/types/request';
-import { getMockRequests, setMockRequests } from '@/data/mock-requests';
+import type { Request, RequestFilters, RequestComment, RequestStatusChange, RequestStatus, RequestTemplate } from '@/types/request';
+import { getMockRequests, setMockRequests, getMockRequestTemplates, setMockRequestTemplates } from '@/data/mock-requests';
 import { matchesFilter } from '@/lib/utils';
 
 function applyFilters(requests: Request[], filters: RequestFilters) {
@@ -109,5 +109,46 @@ export function useAddRequestComment() {
       }
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['requests'] }); qc.invalidateQueries({ queryKey: ['request'] }); },
+  });
+}
+
+// --- Template hooks ---
+
+export function useRequestTemplates() {
+  return useQuery({
+    queryKey: ['request-templates'],
+    queryFn: async () => {
+      await new Promise((r) => setTimeout(r, 100));
+      return getMockRequestTemplates();
+    },
+  });
+}
+
+export function useCreateRequestTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: Omit<RequestTemplate, 'id' | 'createdAt'>) => {
+      await new Promise((r) => setTimeout(r, 200));
+      const all = getMockRequestTemplates();
+      const newT: RequestTemplate = {
+        ...data,
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+      };
+      setMockRequestTemplates([newT, ...all]);
+      return newT;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['request-templates'] }); },
+  });
+}
+
+export function useDeleteRequestTemplate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await new Promise((r) => setTimeout(r, 200));
+      setMockRequestTemplates(getMockRequestTemplates().filter((t) => t.id !== id));
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['request-templates'] }); },
   });
 }

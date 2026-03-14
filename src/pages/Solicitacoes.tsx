@@ -1,17 +1,22 @@
 import { useState } from 'react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { RequestFiltersBar } from '@/components/requests/RequestFilters';
 import { RequestTable } from '@/components/requests/RequestTable';
 import { RequestKanbanBoard } from '@/components/requests/RequestKanbanBoard';
 import { RequestDialog } from '@/components/requests/RequestDialog';
 import { RequestDetailSheet } from '@/components/requests/RequestDetailSheet';
 import { RequestDashboard } from '@/components/requests/RequestDashboard';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useRequests, useUpdateRequestStatus } from '@/hooks/useRequests';
+import { PriorityBadge } from '@/components/shared/PriorityBadge';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
+import { useRequests, useUpdateRequestStatus, useRequestTemplates, useDeleteRequestTemplate } from '@/hooks/useRequests';
 import { useUIStore } from '@/store/ui.store';
-import type { RequestFilters, Request, RequestStatus } from '@/types/request';
-import { Plus, List, Columns3, BarChart3, ChevronUp } from 'lucide-react';
+import { REQUEST_TYPE_LABELS } from '@/types/request';
+import type { RequestFilters, Request, RequestStatus, RequestTemplate } from '@/types/request';
+import { Plus, List, Columns3, BarChart3, ChevronUp, FileText, Briefcase, User, Globe, BarChart2, DollarSign, Layers, Trash2, Play } from 'lucide-react';
 import { toast } from 'sonner';
 
 const VALID_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
@@ -26,16 +31,31 @@ const VALID_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
   CANCELADA: [],
 };
 
+const ASSET_TYPE_ICONS: Record<string, typeof Briefcase> = {
+  CONTA_ANUNCIO: BarChart2,
+  BUSINESS_MANAGER: Briefcase,
+  PERFIL: User,
+  PAGINA: Globe,
+  PIXEL: FileText,
+  SALDO: DollarSign,
+  MISTO: Layers,
+};
+
 export default function Solicitacoes() {
-  const [view, setView] = useState<'list' | 'kanban'>('list');
+  const [view, setView] = useState<'list' | 'kanban' | 'templates'>('list');
   const [filters, setFilters] = useState<RequestFilters>({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [dashboardOpen, setDashboardOpen] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [templateForDialog, setTemplateForDialog] = useState<RequestTemplate | null>(null);
+  const [deleteTemplateId, setDeleteTemplateId] = useState<string | null>(null);
 
   const { data: allRequests } = useRequests({});
   const { data: filteredRequests } = useRequests(filters);
+  const { data: templates } = useRequestTemplates();
   const updateStatus = useUpdateRequestStatus();
+  const deleteTemplate = useDeleteRequestTemplate();
   const user = useUIStore((s) => s.user);
 
   const handleAdvanceStatus = (r: Request) => {
@@ -63,6 +83,26 @@ export default function Solicitacoes() {
 
   const handleDashboardFilter = (f: Partial<RequestFilters>) => {
     setFilters((prev) => ({ ...prev, ...f }));
+  };
+
+  const handleUseTemplate = (tpl: RequestTemplate) => {
+    setPickerOpen(false);
+    setTemplateForDialog(tpl);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) setTemplateForDialog(null);
+  };
+
+  const handleDeleteTemplate = () => {
+    if (!deleteTemplateId) return;
+    deleteTemplate.mutate(deleteTemplateId, {
+      onSuccess: () => toast.success('Template excluído'),
+      onError: () => toast.error('Erro ao excluir template'),
+    });
+    setDeleteTemplateId(null);
   };
 
   return (
@@ -97,8 +137,19 @@ export default function Solicitacoes() {
               >
                 <Columns3 className="h-4 w-4" /> Kanban
               </Button>
+              <Button
+                variant={view === 'templates' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setView('templates')}
+                className="rounded-none gap-1.5"
+              >
+                <FileText className="h-4 w-4" /> Templates
+              </Button>
             </div>
-            <Button onClick={() => setDialogOpen(true)} className="gap-2">
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setPickerOpen(true)}>
+              <FileText className="h-4 w-4" /> Usar Template
+            </Button>
+            <Button onClick={() => { setTemplateForDialog(null); setDialogOpen(true); }} className="gap-2">
               <Plus className="h-4 w-4" /> Nova Solicitação
             </Button>
           </div>
@@ -114,21 +165,166 @@ export default function Solicitacoes() {
         </CollapsibleContent>
       </Collapsible>
 
-      <RequestFiltersBar filters={filters} onFilterChange={(f) => setFilters((prev) => ({ ...prev, ...f }))} />
-
-      {view === 'list' ? (
-        <RequestTable
-          requests={filteredRequests ?? []}
-          onView={(r) => setSelectedRequestId(r.id)}
-          onAdvanceStatus={handleAdvanceStatus}
-          onCancel={handleCancel}
+      {view === 'templates' ? (
+        <TemplatesGrid
+          templates={templates ?? []}
+          onUse={handleUseTemplate}
+          onDelete={(id) => setDeleteTemplateId(id)}
         />
       ) : (
-        <RequestKanbanBoard requests={filteredRequests ?? []} onCardClick={(r) => setSelectedRequestId(r.id)} />
+        <>
+          <RequestFiltersBar filters={filters} onFilterChange={(f) => setFilters((prev) => ({ ...prev, ...f }))} />
+          {view === 'list' ? (
+            <RequestTable
+              requests={filteredRequests ?? []}
+              onView={(r) => setSelectedRequestId(r.id)}
+              onAdvanceStatus={handleAdvanceStatus}
+              onCancel={handleCancel}
+            />
+          ) : (
+            <RequestKanbanBoard requests={filteredRequests ?? []} onCardClick={(r) => setSelectedRequestId(r.id)} />
+          )}
+        </>
       )}
 
-      <RequestDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      {/* Template Picker Dialog */}
+      <TemplatePickerDialog
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        templates={templates ?? []}
+        onSelect={handleUseTemplate}
+      />
+
+      <RequestDialog open={dialogOpen} onOpenChange={handleDialogClose} initialTemplate={templateForDialog} />
       <RequestDetailSheet requestId={selectedRequestId} onClose={() => setSelectedRequestId(null)} />
+
+      <ConfirmDialog
+        open={!!deleteTemplateId}
+        title="Excluir Template"
+        description="Tem certeza que deseja excluir este template? Esta ação não pode ser desfeita."
+        onConfirm={handleDeleteTemplate}
+        onCancel={() => setDeleteTemplateId(null)}
+        variant="danger"
+      />
+    </div>
+  );
+}
+
+// --- Template Picker Dialog ---
+
+function TemplatePickerDialog({ open, onOpenChange, templates, onSelect }: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  templates: RequestTemplate[];
+  onSelect: (t: RequestTemplate) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Selecionar Template</DialogTitle>
+        </DialogHeader>
+        {templates.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-8 text-center">Nenhum template disponível.</p>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 mt-2">
+            {templates.map((tpl) => {
+              const Icon = ASSET_TYPE_ICONS[tpl.assetType] ?? FileText;
+              return (
+                <Card
+                  key={tpl.id}
+                  className="cursor-pointer hover:border-primary/50 transition-colors"
+                  onClick={() => onSelect(tpl)}
+                >
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-sm font-medium truncate">{tpl.name}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>{REQUEST_TYPE_LABELS[tpl.assetType]}</span>
+                      <span>·</span>
+                      <span>Qtd: {tpl.quantity}</span>
+                    </div>
+                    <PriorityBadge priority={tpl.priority} />
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// --- Templates Grid View ---
+
+function TemplatesGrid({ templates, onUse, onDelete }: {
+  templates: RequestTemplate[];
+  onUse: (t: RequestTemplate) => void;
+  onDelete: (id: string) => void;
+}) {
+  if (templates.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+        <p className="text-muted-foreground">Nenhum template salvo ainda.</p>
+        <p className="text-xs text-muted-foreground mt-1">Crie uma solicitação e marque "Salvar como template".</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {templates.map((tpl) => {
+        const Icon = ASSET_TYPE_ICONS[tpl.assetType] ?? FileText;
+        const specEntries = Object.entries(tpl.specifications).slice(0, 3);
+        return (
+          <Card key={tpl.id}>
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Icon className="h-5 w-5 text-muted-foreground shrink-0" />
+                  <h3 className="text-sm font-semibold truncate">{tpl.name}</h3>
+                </div>
+                <PriorityBadge priority={tpl.priority} />
+              </div>
+
+              {tpl.description && (
+                <p className="text-xs text-muted-foreground line-clamp-2">{tpl.description}</p>
+              )}
+
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{REQUEST_TYPE_LABELS[tpl.assetType]}</span>
+                <span>·</span>
+                <span>Qtd: {tpl.quantity}</span>
+              </div>
+
+              {specEntries.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {specEntries.map(([k, v]) => (
+                    <span key={k} className="inline-flex items-center text-xs px-2 py-0.5 rounded-md bg-muted text-muted-foreground">
+                      {k}: {v}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-1">
+                <Button size="sm" variant="default" className="flex-1 gap-1.5" onClick={() => onUse(tpl)}>
+                  <Play className="h-3.5 w-3.5" /> Usar
+                </Button>
+                <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => onDelete(tpl.id)}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+
+              <p className="text-[10px] text-muted-foreground">por {tpl.createdByName}</p>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }
