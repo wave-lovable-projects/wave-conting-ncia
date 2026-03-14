@@ -382,8 +382,6 @@ function SpecFields({ type, form, bms, adAccounts }: SpecFieldsProps) {
       return <SpecBM form={form} />;
     case 'PAGINA':
       return <SpecPagina form={form} />;
-    case 'PIXEL':
-      return <SpecPixel form={form} bms={bms} />;
     case 'SALDO':
       return <SpecSaldo form={form} adAccounts={adAccounts} />;
     case 'MISTO':
