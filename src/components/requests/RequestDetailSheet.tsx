@@ -38,6 +38,7 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
   const { data: request } = useRequest(requestId);
   const updateStatus = useUpdateRequestStatus();
   const user = useUIStore((s) => s.user);
+  const permissions = useRequestPermissions(user?.role, user?.id);
   const [activeTab, setActiveTab] = useState('overview');
 
   if (!request) return null;
