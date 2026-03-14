@@ -76,7 +76,7 @@ function KanbanColumn({
           {requests.length} solic. · {totalAssets} ativos
         </span>
       </div>
-      <div className="p-1.5 space-y-1.5 flex-1 overflow-y-auto">
+      <div className="p-2 space-y-2 flex-1 overflow-y-auto">
         <SortableContext items={requests.map((r) => r.id)} strategy={verticalListSortingStrategy}>
           {requests.map((r) => (
             <RequestKanbanCard key={r.id} request={r} onClick={onCardClick} />
