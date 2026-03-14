@@ -50,9 +50,9 @@ interface NavItem {
 }
 
 const contingenciaItems: NavItem[] = [
-  { title: 'Contas de Anúncio', url: '/', icon: CreditCard },
-  { title: 'Business Managers', url: '/bms', icon: Building2 },
   { title: 'Perfis', url: '/perfis', icon: UserCircle },
+  { title: 'Business Managers', url: '/bms', icon: Building2 },
+  { title: 'Contas de Anúncio', url: '/', icon: CreditCard },
   { title: 'Páginas', url: '/paginas', icon: FileText },
   { title: 'Pixels', url: '/pixels', icon: Crosshair },
 ];
