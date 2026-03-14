@@ -32,7 +32,7 @@ const PRIORITIES = [
 
 const formSchema = z.object({
   title: z.string().trim().min(1, 'Título é obrigatório'),
-  assetType: z.enum(['CONTA_ANUNCIO', 'BUSINESS_MANAGER', 'PERFIL', 'PAGINA', 'PIXEL', 'SALDO', 'MISTO']),
+  assetType: z.enum(['CONTA_ANUNCIO', 'BUSINESS_MANAGER', 'PERFIL', 'PAGINA', 'SALDO', 'MISTO']),
   quantity: z.coerce.number().min(1, 'Mínimo 1'),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']),
   dueDate: z.date().optional(),
