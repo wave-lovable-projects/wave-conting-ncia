@@ -32,7 +32,7 @@ const PRIORITIES = [
 
 const formSchema = z.object({
   title: z.string().trim().min(1, 'Título é obrigatório'),
-  assetType: z.enum(['CONTA_ANUNCIO', 'BUSINESS_MANAGER', 'PERFIL', 'PAGINA', 'SALDO', 'MISTO']),
+  assetType: z.enum(['CONTA_ANUNCIO', 'BUSINESS_MANAGER', 'PERFIL', 'PAGINA', 'SALDO']),
   quantity: z.coerce.number().min(1, 'Mínimo 1'),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']),
   dueDate: z.date().optional(),
@@ -87,8 +87,6 @@ function applySpecsToForm(type: RequestType, specs: Record<string, string>, form
     if (specs.contaDestino) form.setValue('specDestAccount', specs.contaDestino);
     if (specs.valor) form.setValue('specAmount', specs.valor);
     if (specs.moeda) form.setValue('specAmountCurrency', specs.moeda);
-  } else if (type === 'MISTO') {
-    if (specs.detalhes) form.setValue('specDetails', specs.detalhes);
   }
 }
 
@@ -176,9 +174,7 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
       if (values.specDestAccount) specs.contaDestino = values.specDestAccount;
       if (values.specAmount) specs.valor = values.specAmount;
       if (values.specAmountCurrency) specs.moeda = values.specAmountCurrency;
-    } else if (t === 'MISTO') {
-      if (values.specDetails) specs.detalhes = values.specDetails;
-    }
+  }
     return specs;
   }
 
@@ -384,8 +380,6 @@ function SpecFields({ type, form, bms, adAccounts }: SpecFieldsProps) {
       return <SpecPagina form={form} />;
     case 'SALDO':
       return <SpecSaldo form={form} adAccounts={adAccounts} />;
-    case 'MISTO':
-      return <SpecMisto form={form} />;
     default:
       return null;
   }
@@ -565,16 +559,5 @@ function SpecSaldo({ form, adAccounts }: { form: any; adAccounts: any[] }) {
         )} />
       </div>
     </div>
-  );
-}
-
-function SpecMisto({ form }: { form: any }) {
-  return (
-    <FormField control={form.control} name="specDetails" render={({ field }) => (
-      <FormItem>
-        <FormLabel>Detalhes da Combinação</FormLabel>
-        <FormControl><Textarea placeholder="Descreva os ativos e quantidades desejadas..." rows={4} {...field} /></FormControl>
-      </FormItem>
-    )} />
   );
 }

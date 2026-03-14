@@ -45,6 +45,14 @@ export interface ProfileAnnotation {
   createdAt: string;
 }
 
+export interface AnnotationHistoryEntry {
+  id: string;
+  profileId: string;
+  previousContent: string;
+  changedBy: string;
+  changedAt: string;
+}
+
 export interface ProfileComment {
   id: string;
   profileId: string;

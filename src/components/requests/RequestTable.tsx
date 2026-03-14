@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { MoreHorizontal, Eye, ArrowRight, Copy, XCircle, ArrowUpDown, CreditCard, UserCircle, Globe, LayoutGrid, Target, DollarSign, Layers, AlertTriangle, ChevronDown, Clock } from 'lucide-react';
+import { MoreHorizontal, Eye, ArrowRight, Copy, XCircle, ArrowUpDown, CreditCard, UserCircle, Globe, LayoutGrid, Target, DollarSign, AlertTriangle, ChevronDown, Clock } from 'lucide-react';
 import type { Request, RequestType, RequestStatus } from '@/types/request';
 import { REQUEST_TYPE_LABELS, REQUEST_STATUS_LABELS } from '@/types/request';
 import { format, differenceInDays } from 'date-fns';
@@ -16,14 +16,12 @@ import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 import type { RequestPermissions } from '@/hooks/useRequestPermissions';
 
-const assetTypeIcon: Record<RequestType, LucideIcon> = {
+const assetTypeIcon: Record<RequestType, React.ElementType> = {
   CONTA_ANUNCIO: CreditCard,
   BUSINESS_MANAGER: LayoutGrid,
   PERFIL: UserCircle,
   PAGINA: Globe,
-  
   SALDO: DollarSign,
-  MISTO: Layers,
 };
 
 const VALID_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {

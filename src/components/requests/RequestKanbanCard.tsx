@@ -14,7 +14,6 @@ import {
   LayoutGrid,
   Target,
   DollarSign,
-  Layers,
   Clock,
   CalendarDays,
   AlertTriangle,
@@ -33,9 +32,7 @@ const assetTypeIcon: Record<RequestType, LucideIcon> = {
   BUSINESS_MANAGER: LayoutGrid,
   PERFIL: UserCircle,
   PAGINA: Globe,
-  
   SALDO: DollarSign,
-  MISTO: Layers,
 };
 
 const assetTypeUnit: Record<RequestType, string> = {
@@ -43,9 +40,7 @@ const assetTypeUnit: Record<RequestType, string> = {
   BUSINESS_MANAGER: 'BMs',
   PERFIL: 'perfis',
   PAGINA: 'páginas',
-  
   SALDO: 'recargas',
-  MISTO: 'itens',
 };
 
 const TERMINAL_STATUSES = ['ENTREGUE', 'REJEITADA', 'CANCELADA'];

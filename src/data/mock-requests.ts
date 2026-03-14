@@ -112,7 +112,7 @@ let mockRequests: Request[] = [
   },
   {
     id: 'req10', title: 'Pixel para LP produto Z', description: 'Pixel precisa ser criado e configurado para nova landing page',
-    assetType: 'MISTO', priority: 'MEDIUM', status: 'APROVADA', quantity: 1, quantityDelivered: 0, linkedAssetIds: [],
+    assetType: 'PAGINA', priority: 'MEDIUM', status: 'APROVADA', quantity: 1, quantityDelivered: 0, linkedAssetIds: [],
     requesterId: 'u5', requesterName: 'Juliana Costa', dueDate: '2025-03-16T00:00:00Z',
     attachments: [], createdAt: '2025-03-10T10:00:00Z', updatedAt: '2025-03-13T10:00:00Z',
     statusHistory: [{ id: 'sh24', fromStatus: 'PENDENTE', toStatus: 'APROVADA', changedBy: 'Admin Wave', changedAt: '2025-03-13T10:00:00Z' }],
@@ -152,7 +152,7 @@ let mockRequests: Request[] = [
   },
   {
     id: 'req14', title: 'Pedido misto: contas + perfis + BM', description: 'Kit completo para novo gestor que está entrando na operação',
-    assetType: 'MISTO', priority: 'HIGH', status: 'RECEBIDA', quantity: 6, quantityDelivered: 0, linkedAssetIds: [],
+    assetType: 'CONTA_ANUNCIO', priority: 'HIGH', status: 'RECEBIDA', quantity: 6, quantityDelivered: 0, linkedAssetIds: [],
     requesterId: 'u4', requesterName: 'Rafael Santos',
     supplierId: 's2', supplierName: 'AdAccounts Pro', supplierOrderId: 'AAP-0090', supplierOrderDate: '2025-03-05T10:00:00Z', supplierReceivedDate: '2025-03-11T10:00:00Z', supplierCost: 520,
     attachments: [], createdAt: '2025-03-03T10:00:00Z', updatedAt: '2025-03-11T10:00:00Z',
@@ -176,7 +176,7 @@ let mockRequests: Request[] = [
   },
   {
     id: 'req16', title: '2 pixels para domínios novos', description: 'Pixels para os novos domínios da campanha de e-commerce',
-    assetType: 'MISTO', priority: 'MEDIUM', status: 'EM_AQUECIMENTO', quantity: 2, quantityDelivered: 0, linkedAssetIds: [],
+    assetType: 'PERFIL', priority: 'MEDIUM', status: 'EM_AQUECIMENTO', quantity: 2, quantityDelivered: 0, linkedAssetIds: [],
     requesterId: 'u2', requesterName: 'Carlos Silva',
     warmingStartDate: '2025-03-10T08:00:00Z', warmingEndDate: '2025-03-17T08:00:00Z',
     attachments: [], createdAt: '2025-03-08T10:00:00Z', updatedAt: '2025-03-10T08:00:00Z',

@@ -9,7 +9,7 @@ import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import {
   Check, Clock, Package, Send, Truck, Flame, Gift, CreditCard,
-  UserCircle, Globe, LayoutGrid, Target, DollarSign, Layers,
+  UserCircle, Globe, LayoutGrid, Target, DollarSign,
 } from 'lucide-react';
 import {
   REQUEST_STATUS_LABELS, REQUEST_TYPE_LABELS, REQUEST_STATUSES,
@@ -83,9 +83,7 @@ const TYPE_ICONS: Record<RequestType, React.ElementType> = {
   BUSINESS_MANAGER: LayoutGrid,
   PERFIL: UserCircle,
   PAGINA: Globe,
-  
   SALDO: DollarSign,
-  MISTO: Layers,
 };
 
 interface Props { request: Request; permissions?: RequestPermissions }
@@ -97,7 +95,7 @@ export function OverviewTab({ request, permissions }: Props) {
   const managers = getMockUsers().filter((u) => u.role === 'ADMIN' || u.role === 'GESTOR');
   const currentIdx = PIPELINE.indexOf(request.status);
   const validNext = VALID_TRANSITIONS[request.status] ?? [];
-  const TypeIcon = TYPE_ICONS[request.assetType] ?? Layers;
+  const TypeIcon = TYPE_ICONS[request.assetType] ?? DollarSign;
 
   const isAdmin = permissions?.isAdmin !== false;
   const showPipeline = isAdmin ? PIPELINE : GESTOR_PIPELINE;

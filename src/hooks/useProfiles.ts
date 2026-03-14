@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getMockProfiles, setMockProfiles, getMockCheckpoints, setMockCheckpoints, getMockWarmingActions, setMockWarmingActions, getMockAnnotations, setMockAnnotations, getMockComments, setMockComments } from '@/data/mock-profiles';
-import type { Profile, ProfileCheckpoint, WarmingAction, ProfileAnnotation, ProfileComment, ProfileFilters, ProfilePagination } from '@/types/profile';
+import { getMockProfiles, setMockProfiles, getMockCheckpoints, setMockCheckpoints, getMockWarmingActions, setMockWarmingActions, getMockAnnotations, setMockAnnotations, getMockAnnotationHistory, setMockAnnotationHistory, getMockComments, setMockComments } from '@/data/mock-profiles';
+import type { Profile, ProfileCheckpoint, WarmingAction, ProfileAnnotation, ProfileComment, ProfileFilters, ProfilePagination, AnnotationHistoryEntry } from '@/types/profile';
 import { matchesFilter } from '@/lib/utils';
 
 function filterAndPaginate(filters: ProfileFilters, pagination: ProfilePagination) {
@@ -131,6 +131,14 @@ export function useProfileAnnotations(profileId: string) {
   });
 }
 
+export function useAnnotationHistory(profileId: string) {
+  return useQuery({
+    queryKey: ['profiles', profileId, 'annotationHistory'],
+    queryFn: () => Promise.resolve(getMockAnnotationHistory().filter(h => h.profileId === profileId)),
+    enabled: !!profileId,
+  });
+}
+
 export function useCreateAnnotation() {
   const qc = useQueryClient();
   return useMutation({
@@ -147,10 +155,24 @@ export function useUpdateAnnotation() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, profileId, content }: { id: string; profileId: string; content: string }) => {
+      const existing = getMockAnnotations().find(a => a.id === id);
+      if (existing) {
+        const historyEntry: AnnotationHistoryEntry = {
+          id: `ah-${Date.now()}`,
+          profileId,
+          previousContent: existing.content,
+          changedBy: existing.authorName,
+          changedAt: existing.createdAt,
+        };
+        setMockAnnotationHistory([historyEntry, ...getMockAnnotationHistory()]);
+      }
       setMockAnnotations(getMockAnnotations().map(a => a.id === id ? { ...a, content, createdAt: new Date().toISOString() } : a));
       return Promise.resolve();
     },
-    onSuccess: (_d, v) => { qc.invalidateQueries({ queryKey: ['profiles', v.profileId, 'annotations'] }); },
+    onSuccess: (_d, v) => {
+      qc.invalidateQueries({ queryKey: ['profiles', v.profileId, 'annotations'] });
+      qc.invalidateQueries({ queryKey: ['profiles', v.profileId, 'annotationHistory'] });
+    },
   });
 }
 
