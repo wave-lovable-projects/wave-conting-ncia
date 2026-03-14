@@ -1,4 +1,4 @@
-import type { Profile, ProfileCheckpoint, WarmingAction, ProfileAnnotation, ProfileComment } from '@/types/profile';
+import type { Profile, ProfileCheckpoint, WarmingAction, ProfileAnnotation, ProfileComment, AnnotationHistoryEntry } from '@/types/profile';
 
 let mockProfiles: Profile[] = [
   { id: 'pf-1', name: 'Perfil Admin 01', email: 'admin01@outlook.com', password: 'S3nha@Forte1', profileLink: 'https://facebook.com/profile/100001', supplierId: 's1', supplierName: 'Fornecedor Alpha', managerId: 'u1', managerName: 'João Silva', auxiliarId: 'u2', auxiliarName: 'Maria Souza', proxy: '192.168.1.100:8080', status: 'ACTIVE', receivedAt: '2024-06-01', createdAt: '2024-06-01T10:00:00Z', updatedAt: '2024-11-01T10:00:00Z' },
@@ -30,6 +30,11 @@ let mockAnnotations: ProfileAnnotation[] = [
   { id: 'an-2', profileId: 'pf-1', content: 'Trocada a senha após checkpoint. Nova senha forte configurada.', authorName: 'Maria Souza', createdAt: '2024-09-20T09:15:00Z' },
 ];
 
+let mockAnnotationHistory: AnnotationHistoryEntry[] = [
+  { id: 'ah-1', profileId: 'pf-1', previousContent: 'Perfil em observação após checkpoint recente.', changedBy: 'João Silva', changedAt: '2024-10-10T10:00:00Z' },
+  { id: 'ah-2', profileId: 'pf-1', previousContent: 'Perfil novo, aguardando aquecimento.', changedBy: 'Maria Souza', changedAt: '2024-09-15T08:00:00Z' },
+];
+
 let mockComments: ProfileComment[] = [
   { id: 'cm-1', profileId: 'pf-1', text: 'Perfil voltou ao normal após verificação.', authorName: 'João Silva', createdAt: '2024-10-16T10:00:00Z' },
   { id: 'cm-2', profileId: 'pf-1', text: 'Monitorando por mais 48h antes de escalar.', authorName: 'Maria Souza', createdAt: '2024-10-16T11:30:00Z' },
@@ -43,5 +48,7 @@ export function getMockWarmingActions() { return mockWarmingActions; }
 export function setMockWarmingActions(w: WarmingAction[]) { mockWarmingActions = w; }
 export function getMockAnnotations() { return mockAnnotations; }
 export function setMockAnnotations(a: ProfileAnnotation[]) { mockAnnotations = a; }
+export function getMockAnnotationHistory() { return mockAnnotationHistory; }
+export function setMockAnnotationHistory(h: AnnotationHistoryEntry[]) { mockAnnotationHistory = h; }
 export function getMockComments() { return mockComments; }
 export function setMockComments(c: ProfileComment[]) { mockComments = c; }

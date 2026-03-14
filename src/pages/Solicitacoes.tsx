@@ -38,7 +38,6 @@ const ASSET_TYPE_ICONS: Record<string, typeof Briefcase> = {
   PERFIL: User,
   PAGINA: Globe,
   SALDO: DollarSign,
-  MISTO: Layers,
 };
 
 export default function Solicitacoes() {

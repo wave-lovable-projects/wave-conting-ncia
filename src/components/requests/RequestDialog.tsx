@@ -561,14 +561,3 @@ function SpecSaldo({ form, adAccounts }: { form: any; adAccounts: any[] }) {
     </div>
   );
 }
-
-function SpecMisto({ form }: { form: any }) {
-  return (
-    <FormField control={form.control} name="specDetails" render={({ field }) => (
-      <FormItem>
-        <FormLabel>Detalhes da Combinação</FormLabel>
-        <FormControl><Textarea placeholder="Descreva os ativos e quantidades desejadas..." rows={4} {...field} /></FormControl>
-      </FormItem>
-    )} />
-  );
-}

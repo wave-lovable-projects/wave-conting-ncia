@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -7,18 +7,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useProfileCheckpoints, useCreateCheckpoint, useProfileWarming, useCompleteWarmingAction, useProfileAnnotations, useCreateAnnotation, useUpdateAnnotation, useProfileComments, useCreateComment } from '@/hooks/useProfiles';
-import type { Profile } from '@/types/profile';
+import { useProfileCheckpoints, useCreateCheckpoint, useProfileWarming, useCompleteWarmingAction, useProfileAnnotations, useCreateAnnotation, useUpdateAnnotation, useAnnotationHistory, useProfileComments, useCreateComment, useUpdateProfile } from '@/hooks/useProfiles';
+import type { Profile, ProfileStatus } from '@/types/profile';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { Copy, Shield, Flame, MessageSquare, Plus, Send, CalendarIcon, ExternalLink, Save, Loader2, User, Globe, Key } from 'lucide-react';
+import { Copy, Shield, Flame, MessageSquare, Plus, Send, CalendarIcon, ExternalLink, Save, Loader2, User, Globe, Key, Eye, EyeOff, Pencil, History, Package, UserCog, Users, Wifi, Clock, CalendarDays, Ban } from 'lucide-react';
 
 interface ProfileDetailSheetProps {
   open: boolean;
@@ -31,31 +32,20 @@ export function ProfileDetailSheet({ open, onOpenChange, profile }: ProfileDetai
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-3xl overflow-y-auto p-0">
-        <TooltipProvider delayDuration={300}>
+        <TooltipProvider delayDuration={0}>
           <div className="p-6 space-y-6">
-            {/* Header */}
             <ProfileHeader profile={profile} />
-
             <Separator />
-
-            {/* Config grid */}
             <ProfileConfigGrid profile={profile} />
-
             <Separator />
-
-            {/* Single annotation */}
             <AnnotationSection profileId={profile.id} />
-
             <Separator />
-
-            {/* Tabs */}
             <Tabs defaultValue="checkpoints" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="checkpoints"><Shield className="h-4 w-4 mr-1.5" /> Checkpoints</TabsTrigger>
                 <TabsTrigger value="warming"><Flame className="h-4 w-4 mr-1.5" /> Aquecimento</TabsTrigger>
                 <TabsTrigger value="comments"><MessageSquare className="h-4 w-4 mr-1.5" /> Comentários</TabsTrigger>
               </TabsList>
-
               <TabsContent value="checkpoints" className="mt-4"><CheckpointsTab profileId={profile.id} /></TabsContent>
               <TabsContent value="warming" className="mt-4"><WarmingTab profileId={profile.id} /></TabsContent>
               <TabsContent value="comments" className="mt-4"><CommentsTab profileId={profile.id} /></TabsContent>
@@ -67,9 +57,78 @@ export function ProfileDetailSheet({ open, onOpenChange, profile }: ProfileDetai
   );
 }
 
+/* ─── Inline Editable Field ─── */
+function EditableField({ value, onSave, label, mono, type = 'text' }: {
+  value: string;
+  onSave: (val: string) => void;
+  label: string;
+  mono?: boolean;
+  type?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { setDraft(value); }, [value]);
+  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
+
+  const save = () => {
+    setEditing(false);
+    if (draft !== value) onSave(draft);
+  };
+
+  if (editing) {
+    return (
+      <Input
+        ref={inputRef}
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={save}
+        onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setDraft(value); setEditing(false); } }}
+        className={cn('h-7 text-sm', mono && 'font-mono')}
+        type={type}
+      />
+    );
+  }
+
+  return (
+    <div
+      className="group/edit flex items-center gap-1 rounded px-1.5 py-0.5 -mx-1.5 cursor-pointer hover:bg-muted/50 transition-colors min-h-[28px]"
+      onClick={() => setEditing(true)}
+    >
+      <span className={cn('text-sm', mono && 'font-mono', !value && 'text-muted-foreground')}>
+        {value || '—'}
+      </span>
+      <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover/edit:opacity-100 transition-opacity shrink-0" />
+    </div>
+  );
+}
+
+function EditableSelect({ value, onSave, options }: {
+  value: string;
+  onSave: (val: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <Select value={value} onValueChange={onSave}>
+      <SelectTrigger className="h-7 text-sm w-full">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+      </SelectContent>
+    </Select>
+  );
+}
+
 /* ─── Header ─── */
 function ProfileHeader({ profile }: { profile: Profile }) {
+  const updateProfile = useUpdateProfile();
   const copy = (text: string, label: string) => { navigator.clipboard.writeText(text); toast({ title: `${label} copiado!` }); };
+
+  const handleUpdate = (field: string, value: string) => {
+    updateProfile.mutate({ id: profile.id, [field]: value } as any);
+  };
 
   return (
     <SheetHeader className="space-y-3">
@@ -78,10 +137,10 @@ function ProfileHeader({ profile }: { profile: Profile }) {
           <div className="flex-shrink-0 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
             <User className="h-6 w-6 text-primary" />
           </div>
-          <div className="min-w-0">
-            <SheetTitle className="text-xl">{profile.name}</SheetTitle>
+          <div className="min-w-0 flex-1">
+            <EditableField value={profile.name} onSave={v => handleUpdate('name', v)} label="Nome" />
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-sm text-muted-foreground truncate">{profile.email}</span>
+              <EditableField value={profile.email} onSave={v => handleUpdate('email', v)} label="Email" type="email" />
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copy(profile.email, 'Email')}>
@@ -93,52 +152,113 @@ function ProfileHeader({ profile }: { profile: Profile }) {
             </div>
           </div>
         </div>
-        <StatusBadge status={profile.status} />
+        <EditableSelect
+          value={profile.status}
+          onSave={v => handleUpdate('status', v)}
+          options={[
+            { value: 'ACTIVE', label: 'Ativo' },
+            { value: 'DISABLED', label: 'Desabilitado' },
+            { value: 'BLOCKED', label: 'Bloqueado' },
+          ]}
+        />
       </div>
-      {profile.profileLink && (
-        <a href={profile.profileLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
-          <ExternalLink className="h-3.5 w-3.5" /> Abrir perfil no Facebook
-        </a>
-      )}
+      <div className="flex items-center gap-1.5">
+        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+        <EditableField value={profile.profileLink || ''} onSave={v => handleUpdate('profileLink', v)} label="Link do Perfil" />
+        {profile.profileLink && (
+          <a href={profile.profileLink} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs shrink-0">
+            Abrir
+          </a>
+        )}
+      </div>
     </SheetHeader>
   );
 }
 
 /* ─── Config Grid ─── */
 function ProfileConfigGrid({ profile }: { profile: Profile }) {
-  const items = [
-    { label: 'Fornecedor', value: profile.supplierName },
-    { label: 'Gestor', value: profile.managerName },
-    { label: 'Auxiliar', value: profile.auxiliarName },
-    { label: 'Proxy', value: profile.proxy, mono: true },
-    { label: 'Dt. Recebimento', value: profile.receivedAt ? format(new Date(profile.receivedAt), 'dd/MM/yyyy') : undefined },
-    { label: 'Dt. Desativação', value: profile.deactivatedAt ? format(new Date(profile.deactivatedAt), 'dd/MM/yyyy') : undefined },
+  const updateProfile = useUpdateProfile();
+  const [showPassword, setShowPassword] = useState(false);
+  const copy = (text: string, label: string) => { navigator.clipboard.writeText(text); toast({ title: `${label} copiado!` }); };
+
+  const handleUpdate = (field: string, value: string) => {
+    updateProfile.mutate({ id: profile.id, [field]: value } as any);
+  };
+
+  const items: { label: string; icon: React.ElementType; field: string; value: string; mono?: boolean; editable?: boolean }[] = [
+    { label: 'Fornecedor', icon: Package, field: 'supplierName', value: profile.supplierName || '', editable: true },
+    { label: 'Gestor', icon: UserCog, field: 'managerName', value: profile.managerName || '', editable: true },
+    { label: 'Auxiliar', icon: Users, field: 'auxiliarName', value: profile.auxiliarName || '', editable: true },
+    { label: 'Proxy', icon: Wifi, field: 'proxy', value: profile.proxy || '', mono: true, editable: true },
+    { label: 'Dt. Recebimento', icon: CalendarDays, field: 'receivedAt', value: profile.receivedAt ? format(new Date(profile.receivedAt), 'dd/MM/yyyy') : '', editable: false },
+    { label: 'Dt. Desativação', icon: Ban, field: 'deactivatedAt', value: profile.deactivatedAt ? format(new Date(profile.deactivatedAt), 'dd/MM/yyyy') : '', editable: false },
+    { label: 'Criado em', icon: Clock, field: 'createdAt', value: format(new Date(profile.createdAt), 'dd/MM/yyyy HH:mm'), editable: false },
+    { label: 'Atualizado em', icon: Clock, field: 'updatedAt', value: format(new Date(profile.updatedAt), 'dd/MM/yyyy HH:mm'), editable: false },
   ];
 
   return (
     <div>
       <h3 className="text-sm font-semibold text-foreground mb-3">Configurações</h3>
       <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-        {items.map(item => (
-          <div key={item.label} className="flex flex-col gap-0.5">
-            <span className="text-xs text-muted-foreground">{item.label}</span>
-            <span className={cn('text-sm text-foreground', item.mono && 'font-mono', !item.value && 'text-muted-foreground')}>
-              {item.value || '—'}
-            </span>
+        {items.map(item => {
+          const Icon = item.icon;
+          return (
+            <div key={item.label} className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1.5">
+                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">{item.label}</span>
+              </div>
+              {item.editable ? (
+                <EditableField value={item.value} onSave={v => handleUpdate(item.field, v)} label={item.label} mono={item.mono} />
+              ) : (
+                <span className={cn('text-sm text-foreground px-1.5', item.mono && 'font-mono', !item.value && 'text-muted-foreground')}>
+                  {item.value || '—'}
+                </span>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Password field */}
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-1.5">
+            <Key className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Senha</span>
           </div>
-        ))}
+          <div className="flex items-center gap-1">
+            <span className="text-sm font-mono px-1.5">{showPassword ? profile.password : '••••••••'}</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{showPassword ? 'Ocultar senha' : 'Mostrar senha'}</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copy(profile.password, 'Senha')}>
+                  <Copy className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Copiar senha</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-/* ─── Single Annotation ─── */
+/* ─── Single Annotation with History ─── */
 function AnnotationSection({ profileId }: { profileId: string }) {
   const { data: annotations } = useProfileAnnotations(profileId);
+  const { data: history } = useAnnotationHistory(profileId);
   const createAnnotation = useCreateAnnotation();
   const updateAnnotation = useUpdateAnnotation();
   const [content, setContent] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const existing = annotations?.[0];
 
@@ -164,8 +284,17 @@ function AnnotationSection({ profileId }: { profileId: string }) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center gap-2 mb-2">
         <h3 className="text-sm font-semibold text-foreground">Anotação</h3>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setHistoryOpen(true)}>
+              <History className="h-3.5 w-3.5 text-muted-foreground" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Histórico de alterações</TooltipContent>
+        </Tooltip>
+        <div className="flex-1" />
         {existing && !isEditing && (
           <span className="text-xs text-muted-foreground">
             Atualizado em {format(new Date(existing.createdAt), 'dd/MM/yyyy HH:mm')}
@@ -179,11 +308,38 @@ function AnnotationSection({ profileId }: { profileId: string }) {
         className="min-h-[80px] resize-none"
       />
       {hasChanges && (
-        <Button size="sm" onClick={handleSave} disabled={isSaving} className="mt-2">
-          {isSaving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
-          Salvar
-        </Button>
+        <div className="flex justify-end mt-2">
+          <Button size="sm" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
+            Salvar
+          </Button>
+        </div>
       )}
+
+      {/* History Dialog */}
+      <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[70vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Histórico de Alterações</DialogTitle>
+            <DialogDescription>Versões anteriores da anotação deste perfil</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 mt-2">
+            {(!history || history.length === 0) ? (
+              <p className="text-sm text-muted-foreground text-center py-6">Nenhuma alteração registrada.</p>
+            ) : (
+              history.map(h => (
+                <div key={h.id} className="rounded-lg border border-border p-3 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-foreground">{h.changedBy}</span>
+                    <span className="text-xs text-muted-foreground">{format(new Date(h.changedAt), 'dd/MM/yyyy HH:mm')}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{h.previousContent}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -207,10 +363,12 @@ function CheckpointsTab({ profileId }: { profileId: string }) {
 
   return (
     <div className="space-y-4">
-      <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="h-4 w-4 mr-1" /> Registrar Checkpoint</Button>
+      <div className="flex justify-end">
+        <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="h-4 w-4 mr-1" /> Registrar Checkpoint</Button>
+      </div>
       <div className="space-y-3">
         {checkpoints?.map(cp => (
-          <div key={cp.id} className="rounded-lg bg-surface-1 p-3 border border-border">
+          <div key={cp.id} className="rounded-lg border border-border p-3">
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm font-medium text-foreground">{cp.reason}</span>
               <span className="text-xs text-muted-foreground">{format(new Date(cp.date), 'dd/MM/yyyy')}</span>
@@ -240,13 +398,7 @@ function CheckpointsTab({ profileId }: { profileId: string }) {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
+                  <Calendar mode="single" selected={date} onSelect={setDate} initialFocus className={cn("p-3 pointer-events-auto")} />
                 </PopoverContent>
               </Popover>
             </div>
@@ -288,7 +440,7 @@ function WarmingTab({ profileId }: { profileId: string }) {
       )}
       <div className="space-y-2">
         {actions?.map(a => (
-          <div key={a.id} className="flex items-center gap-3 rounded-lg bg-surface-1 p-3 border border-border">
+          <div key={a.id} className="flex items-center gap-3 rounded-lg border border-border p-3">
             <Checkbox checked={a.completed} onCheckedChange={(v) => handleToggle(a.id, !!v)} />
             <span className={cn('text-sm', a.completed ? 'line-through text-muted-foreground' : 'text-foreground')}>{a.action}</span>
           </div>
@@ -316,7 +468,7 @@ function CommentsTab({ profileId }: { profileId: string }) {
     <div className="space-y-4">
       <div className="space-y-3 max-h-[300px] overflow-y-auto">
         {comments?.map(c => (
-          <div key={c.id} className="rounded-lg bg-surface-1 p-3 border border-border">
+          <div key={c.id} className="rounded-lg border border-border p-3">
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm font-medium text-foreground">{c.authorName}</span>
               <span className="text-xs text-muted-foreground">{format(new Date(c.createdAt), 'dd/MM/yyyy HH:mm')}</span>

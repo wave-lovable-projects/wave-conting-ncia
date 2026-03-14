@@ -40,7 +40,6 @@ export const REQUEST_TYPE_LABELS: Record<RequestType, string> = {
   PERFIL: 'Perfil',
   PAGINA: 'Página',
   SALDO: 'Saldo (Recarga)',
-  MISTO: 'Misto',
 };
 
 export type RequestPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
