@@ -418,7 +418,7 @@ function SpecFields({ type, form, bms, adAccounts, portalContainer }: SpecFields
   }
 }
 
-function SpecContaAnuncio({ form, bms }: { form: any; bms: any[] }) {
+function SpecContaAnuncio({ form, bms, portalContainer }: { form: any; bms: any[]; portalContainer?: HTMLElement | null }) {
   const bmOptions: ComboboxOption[] = bms.map((bm) => ({
     value: bm.name,
     label: `${bm.name} (${bm.bmId})`,
