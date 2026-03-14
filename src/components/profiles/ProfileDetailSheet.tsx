@@ -223,21 +223,45 @@ function ProfileConfigGrid({ profile }: { profile: Profile }) {
     updateProfile.mutate({ id: profile.id, [field]: value } as any);
   };
 
-  const items: { label: string; icon: React.ElementType; field: string; value: string; mono?: boolean; editable?: boolean }[] = [
-    { label: 'Fornecedor', icon: Package, field: 'supplierName', value: profile.supplierName || '', editable: true },
-    { label: 'Gestor', icon: UserCog, field: 'managerName', value: profile.managerName || '', editable: true },
-    { label: 'Auxiliar', icon: Users, field: 'auxiliarName', value: profile.auxiliarName || '', editable: true },
-    { label: 'Proxy', icon: Wifi, field: 'proxy', value: profile.proxy || '', mono: true, editable: true },
-    { label: 'Dt. Recebimento', icon: CalendarDays, field: 'receivedAt', value: profile.receivedAt ? format(new Date(profile.receivedAt), 'dd/MM/yyyy') : '', editable: false },
-    { label: 'Dt. Desativação', icon: Ban, field: 'deactivatedAt', value: profile.deactivatedAt ? format(new Date(profile.deactivatedAt), 'dd/MM/yyyy') : '', editable: false },
-    { label: 'Criado em', icon: Clock, field: 'createdAt', value: format(new Date(profile.createdAt), 'dd/MM/yyyy HH:mm'), editable: false },
-    { label: 'Atualizado em', icon: Clock, field: 'updatedAt', value: format(new Date(profile.updatedAt), 'dd/MM/yyyy HH:mm'), editable: false },
-  ];
+    const selectFields: { label: string; icon: React.ElementType; idField: string; nameField: string; currentId: string; currentName: string; options: { value: string; label: string }[] }[] = [
+      { label: 'Fornecedor', icon: Package, idField: 'supplierId', nameField: 'supplierName', currentId: profile.supplierId || '', currentName: profile.supplierName || '', options: SUPPLIER_OPTIONS },
+      { label: 'Gestor', icon: UserCog, idField: 'managerId', nameField: 'managerName', currentId: profile.managerId || '', currentName: profile.managerName || '', options: MANAGER_OPTIONS },
+      { label: 'Auxiliar', icon: Users, idField: 'auxiliarId', nameField: 'auxiliarName', currentId: profile.auxiliarId || '', currentName: profile.auxiliarName || '', options: MANAGER_OPTIONS },
+    ];
 
-  return (
+    return (
     <div>
       <h3 className="text-sm font-semibold text-foreground mb-3">Configurações</h3>
       <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+        {selectFields.map(sf => {
+          const Icon = sf.icon;
+          return (
+            <div key={sf.label} className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1.5">
+                <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">{sf.label}</span>
+              </div>
+              <EditableSelect
+                value={sf.currentId}
+                onSave={v => {
+                  const label = sf.options.find(o => o.value === v)?.label || '';
+                  updateProfile.mutate({ id: profile.id, [sf.idField]: v, [sf.nameField]: label } as any);
+                }}
+                options={sf.options}
+              />
+            </div>
+          );
+        })}
+
+        {/* Proxy — text field */}
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-1.5">
+            <Wifi className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Proxy</span>
+          </div>
+          <EditableField value={profile.proxy || ''} onSave={v => handleUpdate('proxy', v)} label="Proxy" mono />
+        </div>
+
         {items.map(item => {
           const Icon = item.icon;
           return (
@@ -246,13 +270,9 @@ function ProfileConfigGrid({ profile }: { profile: Profile }) {
                 <Icon className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="text-xs text-muted-foreground">{item.label}</span>
               </div>
-              {item.editable ? (
-                <EditableField value={item.value} onSave={v => handleUpdate(item.field, v)} label={item.label} mono={item.mono} />
-              ) : (
-                <span className={cn('text-sm text-foreground px-1.5', item.mono && 'font-mono', !item.value && 'text-muted-foreground')}>
-                  {item.value || '—'}
-                </span>
-              )}
+              <span className={cn('text-sm text-foreground px-1.5', !item.value && 'text-muted-foreground')}>
+                {item.value || '—'}
+              </span>
             </div>
           );
         })}
