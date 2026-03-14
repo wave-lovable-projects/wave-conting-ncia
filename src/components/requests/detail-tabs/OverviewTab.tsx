@@ -76,6 +76,10 @@ export function OverviewTab({ request, permissions }: Props) {
   const validNext = VALID_TRANSITIONS[request.status] ?? [];
   const TypeIcon = TYPE_ICONS[request.assetType] ?? Layers;
 
+  const isAdmin = permissions?.isAdmin !== false;
+  const showPipeline = isAdmin ? PIPELINE : GESTOR_PIPELINE;
+  const currentPipelineIdx = isAdmin ? currentIdx : getGestorIndex(request.status);
+
   const handleStatusChange = async (status: string) => {
     try {
       await updateStatus.mutateAsync({ id: request.id, status: status as RequestStatus, changedBy: user?.name ?? 'Sistema' });
