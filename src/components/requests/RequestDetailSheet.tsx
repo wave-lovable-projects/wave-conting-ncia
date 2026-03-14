@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useRequest, useUpdateRequestStatus } from '@/hooks/useRequests';
 import { useUIStore } from '@/store/ui.store';
+import { useRequestPermissions } from '@/hooks/useRequestPermissions';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Eye, Truck, Package, Flame, Clock } from 'lucide-react';
 import type { RequestStatus } from '@/types/request';
