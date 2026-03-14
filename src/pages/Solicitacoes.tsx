@@ -6,10 +6,12 @@ import { RequestTable } from '@/components/requests/RequestTable';
 import { RequestKanbanBoard } from '@/components/requests/RequestKanbanBoard';
 import { RequestDialog } from '@/components/requests/RequestDialog';
 import { RequestDetailSheet } from '@/components/requests/RequestDetailSheet';
+import { RequestDashboard } from '@/components/requests/RequestDashboard';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useRequests, useUpdateRequestStatus } from '@/hooks/useRequests';
 import { useUIStore } from '@/store/ui.store';
 import type { RequestFilters, Request, RequestStatus } from '@/types/request';
-import { Plus, List, Columns3 } from 'lucide-react';
+import { Plus, List, Columns3, BarChart3, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 
 const VALID_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
@@ -29,8 +31,10 @@ export default function Solicitacoes() {
   const [filters, setFilters] = useState<RequestFilters>({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+  const [dashboardOpen, setDashboardOpen] = useState(true);
 
-  const { data: requests } = useRequests(filters);
+  const { data: allRequests } = useRequests({});
+  const { data: filteredRequests } = useRequests(filters);
   const updateStatus = useUpdateRequestStatus();
   const user = useUIStore((s) => s.user);
 
@@ -57,12 +61,27 @@ export default function Solicitacoes() {
     );
   };
 
+  const handleDashboardFilter = (f: Partial<RequestFilters>) => {
+    setFilters((prev) => ({ ...prev, ...f }));
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Solicitações"
         actions={
           <div className="flex items-center gap-2">
+            <CollapsibleTrigger asChild>
+              <Button
+                variant={dashboardOpen ? 'secondary' : 'ghost'}
+                size="sm"
+                className="gap-1.5"
+                onClick={() => setDashboardOpen((o) => !o)}
+              >
+                {dashboardOpen ? <ChevronUp className="h-4 w-4" /> : <BarChart3 className="h-4 w-4" />}
+                {dashboardOpen ? 'Ocultar' : 'Dashboard'}
+              </Button>
+            </CollapsibleTrigger>
             <div className="flex items-center rounded-lg border border-border overflow-hidden">
               <Button
                 variant={view === 'list' ? 'secondary' : 'ghost'}
@@ -88,17 +107,26 @@ export default function Solicitacoes() {
         }
       />
 
+      <Collapsible open={dashboardOpen} onOpenChange={setDashboardOpen}>
+        <CollapsibleContent>
+          <RequestDashboard
+            requests={allRequests ?? []}
+            onFilterChange={handleDashboardFilter}
+          />
+        </CollapsibleContent>
+      </Collapsible>
+
       <RequestFiltersBar filters={filters} onFilterChange={(f) => setFilters((prev) => ({ ...prev, ...f }))} />
 
       {view === 'list' ? (
         <RequestTable
-          requests={requests ?? []}
+          requests={filteredRequests ?? []}
           onView={(r) => setSelectedRequestId(r.id)}
           onAdvanceStatus={handleAdvanceStatus}
           onCancel={handleCancel}
         />
       ) : (
-        <RequestKanbanBoard requests={requests ?? []} onCardClick={(r) => setSelectedRequestId(r.id)} />
+        <RequestKanbanBoard requests={filteredRequests ?? []} onCardClick={(r) => setSelectedRequestId(r.id)} />
       )}
 
       <RequestDialog open={dialogOpen} onOpenChange={setDialogOpen} />
