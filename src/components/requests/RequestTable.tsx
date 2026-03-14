@@ -176,7 +176,7 @@ export function RequestTable({ requests, onView, onAdvanceStatus, onCancel, hide
                         >
                           <Copy className="h-4 w-4" /> Copiar ID
                         </DropdownMenuItem>
-                        {canCancel && (
+                        {canCancelThis && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => onCancel?.(r)} className="gap-2 text-destructive focus:text-destructive">
