@@ -192,16 +192,23 @@ export function OverviewTab({ request, permissions }: Props) {
         <InfoRow label="Solicitante">
           <span className="text-sm text-foreground">{request.requesterName}</span>
         </InfoRow>
-        <InfoRow label="Responsável">
-          <Select value={request.assigneeId ?? ''} onValueChange={handleAssignee} disabled={updateRequest.isPending}>
-            <SelectTrigger className="w-48 h-8"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
-            <SelectContent>
-              {managers.map((m) => (
-                <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </InfoRow>
+        {isAdmin && (
+          <InfoRow label="Responsável">
+            <Select value={request.assigneeId ?? ''} onValueChange={handleAssignee} disabled={updateRequest.isPending}>
+              <SelectTrigger className="w-48 h-8"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
+              <SelectContent>
+                {managers.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </InfoRow>
+        )}
+        {!isAdmin && request.assigneeName && (
+          <InfoRow label="Responsável">
+            <span className="text-sm text-foreground">{request.assigneeName}</span>
+          </InfoRow>
+        )}
 
         {/* Status select with valid transitions */}
         {validNext.length > 0 && (
