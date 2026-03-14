@@ -114,3 +114,15 @@ export interface RequestFilters {
   dateFrom?: string;
   dateTo?: string;
 }
+
+export interface RequestTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  assetType: RequestType;
+  quantity: number;
+  priority: RequestPriority;
+  specifications: Record<string, string>;
+  createdByName: string;
+  createdAt: string;
+}

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Request, RequestFilters, RequestComment, RequestStatusChange, RequestStatus } from '@/types/request';
-import { getMockRequests, setMockRequests } from '@/data/mock-requests';
+import type { Request, RequestFilters, RequestComment, RequestStatusChange, RequestStatus, RequestTemplate } from '@/types/request';
+import { getMockRequests, setMockRequests, getMockRequestTemplates, setMockRequestTemplates } from '@/data/mock-requests';
 import { matchesFilter } from '@/lib/utils';
 
 function applyFilters(requests: Request[], filters: RequestFilters) {
