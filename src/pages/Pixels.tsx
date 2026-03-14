@@ -88,10 +88,6 @@ export default function Pixels() {
   const handleBulkApply = async (values: Record<string, string>) => {
     const data: Record<string, string> = {};
     if (values.status) data.status = values.status;
-    if (values.supplierId) {
-      data.supplierId = values.supplierId;
-      data.supplierName = SUPPLIER_OPTIONS.find(s => s.value === values.supplierId)?.label || '';
-    }
     if (values.bmId) {
       data.bmId = values.bmId;
       data.bmName = BM_OPTIONS.find(b => b.value === values.bmId)?.label || '';
