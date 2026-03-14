@@ -58,6 +58,18 @@ export default function Solicitacoes() {
   const updateStatus = useUpdateRequestStatus();
   const deleteTemplate = useDeleteRequestTemplate();
   const user = useUIStore((s) => s.user);
+  const permissions = useRequestPermissions(user?.role, user?.id);
+
+  // Filter requests by ownership for non-admin users
+  const visibleAll = useMemo(() => {
+    if (permissions.canViewAllRequests || !user) return allRequests ?? [];
+    return (allRequests ?? []).filter((r) => r.requesterId === user.id);
+  }, [allRequests, permissions.canViewAllRequests, user]);
+
+  const visibleFiltered = useMemo(() => {
+    if (permissions.canViewAllRequests || !user) return filteredRequests ?? [];
+    return (filteredRequests ?? []).filter((r) => r.requesterId === user.id);
+  }, [filteredRequests, permissions.canViewAllRequests, user]);
 
   const handleAdvanceStatus = (r: Request) => {
     const nextStatuses = VALID_TRANSITIONS[r.status] ?? [];
