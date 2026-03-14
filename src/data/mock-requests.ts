@@ -112,7 +112,7 @@ let mockRequests: Request[] = [
   },
   {
     id: 'req10', title: 'Pixel para LP produto Z', description: 'Pixel precisa ser criado e configurado para nova landing page',
-    assetType: 'PIXEL', priority: 'MEDIUM', status: 'APROVADA', quantity: 1, quantityDelivered: 0, linkedAssetIds: [],
+    assetType: 'MISTO', priority: 'MEDIUM', status: 'APROVADA', quantity: 1, quantityDelivered: 0, linkedAssetIds: [],
     requesterId: 'u5', requesterName: 'Juliana Costa', dueDate: '2025-03-16T00:00:00Z',
     attachments: [], createdAt: '2025-03-10T10:00:00Z', updatedAt: '2025-03-13T10:00:00Z',
     statusHistory: [{ id: 'sh24', fromStatus: 'PENDENTE', toStatus: 'APROVADA', changedBy: 'Admin Wave', changedAt: '2025-03-13T10:00:00Z' }],
