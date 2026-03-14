@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { useRequests, useUpdateRequestStatus, useRequestTemplates, useDeleteRequestTemplate } from '@/hooks/useRequests';
 import { useUIStore } from '@/store/ui.store';
+import { useRequestPermissions } from '@/hooks/useRequestPermissions';
 import { REQUEST_TYPE_LABELS } from '@/types/request';
 import type { RequestFilters, Request, RequestStatus, RequestTemplate } from '@/types/request';
 import { Plus, List, Columns3, BarChart3, ChevronUp, FileText, Briefcase, User, Globe, BarChart2, DollarSign, Layers, Trash2, Play } from 'lucide-react';
