@@ -33,7 +33,7 @@ const assetTypeIcon: Record<RequestType, LucideIcon> = {
   BUSINESS_MANAGER: LayoutGrid,
   PERFIL: UserCircle,
   PAGINA: Globe,
-  PIXEL: Target,
+  
   SALDO: DollarSign,
   MISTO: Layers,
 };
