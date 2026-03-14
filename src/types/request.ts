@@ -40,7 +40,6 @@ export const REQUEST_TYPE_LABELS: Record<RequestType, string> = {
   BUSINESS_MANAGER: 'Business Manager',
   PERFIL: 'Perfil',
   PAGINA: 'Página',
-  PIXEL: 'Pixel',
   SALDO: 'Saldo (Recarga)',
   MISTO: 'Misto',
 };

@@ -37,7 +37,6 @@ const ASSET_TYPE_ICONS: Record<string, typeof Briefcase> = {
   BUSINESS_MANAGER: Briefcase,
   PERFIL: User,
   PAGINA: Globe,
-  PIXEL: FileText,
   SALDO: DollarSign,
   MISTO: Layers,
 };
