@@ -139,6 +139,7 @@ ComboboxField.displayName = 'ComboboxField';
 export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
   const createMutation = useCreateRequest();
   const createTemplateMutation = useCreateRequestTemplate();
+  const sheetRef = useRef<HTMLDivElement>(null);
   const bms = getMockBMs();
   const adAccounts = getMockAdAccounts();
 
