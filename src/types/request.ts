@@ -30,7 +30,6 @@ export const REQUEST_TYPES = [
   'PERFIL',
   'PAGINA',
   'SALDO',
-  'MISTO',
 ] as const;
 
 export type RequestType = (typeof REQUEST_TYPES)[number];
