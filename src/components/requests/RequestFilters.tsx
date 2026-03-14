@@ -1,17 +1,12 @@
 import { useMemo } from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Search, CalendarIcon } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { UnifiedFilter } from '@/components/shared/UnifiedFilter';
 import type { FilterCategory } from '@/components/shared/UnifiedFilter';
 import type { RequestFilters } from '@/types/request';
 import { REQUEST_STATUS_LABELS, REQUEST_TYPE_LABELS, REQUEST_STATUSES, REQUEST_TYPES } from '@/types/request';
 import { getMockSuppliers } from '@/data/mock-suppliers';
 import { getMockUsers } from '@/data/mock-users';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 
 interface Props {
   filters: RequestFilters;
@@ -55,8 +50,17 @@ export function RequestFiltersBar({ filters, onFilterChange }: Props) {
     onFilterChange(partial);
   };
 
-  const dateFrom = filters.dateFrom ? new Date(filters.dateFrom) : undefined;
-  const dateTo = filters.dateTo ? new Date(filters.dateTo) : undefined;
+  const dateRange = useMemo(() => ({
+    from: filters.dateFrom ? new Date(filters.dateFrom) : undefined,
+    to: filters.dateTo ? new Date(filters.dateTo) : undefined,
+  }), [filters.dateFrom, filters.dateTo]);
+
+  const handleDateRangeChange = (range: { from?: Date; to?: Date }) => {
+    onFilterChange({
+      dateFrom: range.from ? range.from.toISOString() : undefined,
+      dateTo: range.to ? range.to.toISOString() : undefined,
+    });
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-3">
@@ -70,43 +74,13 @@ export function RequestFiltersBar({ filters, onFilterChange }: Props) {
         />
       </div>
 
-      <UnifiedFilter categories={categories} values={values} onChange={handleChange} />
-
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className={cn('gap-1.5 text-xs', dateFrom && 'text-foreground')}>
-            <CalendarIcon className="h-3.5 w-3.5" />
-            {dateFrom ? format(dateFrom, 'dd/MM/yyyy') : 'De'}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={dateFrom}
-            onSelect={(d) => onFilterChange({ dateFrom: d ? d.toISOString() : undefined })}
-            initialFocus
-            className={cn('p-3 pointer-events-auto')}
-          />
-        </PopoverContent>
-      </Popover>
-
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className={cn('gap-1.5 text-xs', dateTo && 'text-foreground')}>
-            <CalendarIcon className="h-3.5 w-3.5" />
-            {dateTo ? format(dateTo, 'dd/MM/yyyy') : 'Até'}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={dateTo}
-            onSelect={(d) => onFilterChange({ dateTo: d ? d.toISOString() : undefined })}
-            initialFocus
-            className={cn('p-3 pointer-events-auto')}
-          />
-        </PopoverContent>
-      </Popover>
+      <UnifiedFilter
+        categories={categories}
+        values={values}
+        onChange={handleChange}
+        dateRange={dateRange}
+        onDateRangeChange={handleDateRangeChange}
+      />
     </div>
   );
 }
