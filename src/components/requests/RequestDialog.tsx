@@ -527,29 +527,8 @@ function SpecPagina({ form }: { form: any }) {
   );
 }
 
-function SpecPixel({ form, bms }: { form: any; bms: any[] }) {
-  return (
-    <div className="space-y-4">
-      <FormField control={form.control} name="specDomain" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Domínio Alvo</FormLabel>
-          <FormControl><Input placeholder="Ex: meusite.com.br" {...field} /></FormControl>
-        </FormItem>
-      )} />
-      <FormField control={form.control} name="specBm" render={({ field }) => (
-        <FormItem>
-          <FormLabel>BM Desejada (opcional)</FormLabel>
-          <Select value={field.value || ''} onValueChange={field.onChange}>
-            <FormControl><SelectTrigger><SelectValue placeholder="Selecionar BM" /></SelectTrigger></FormControl>
-            <SelectContent>
-              {bms.map((bm) => <SelectItem key={bm.id} value={bm.name}>{bm.name} ({bm.bmId})</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </FormItem>
-      )} />
-    </div>
-  );
-}
+
+
 
 function SpecSaldo({ form, adAccounts }: { form: any; adAccounts: any[] }) {
   return (
