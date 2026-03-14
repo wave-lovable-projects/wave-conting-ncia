@@ -126,30 +126,55 @@ export function OverviewTab({ request, permissions }: Props) {
     <div className="space-y-5">
       {/* Pipeline progress */}
       <div className="flex items-center gap-1 overflow-x-auto pb-2">
-        {PIPELINE.map((s, i) => {
-          const Icon = STEP_ICONS[s];
-          const isActive = s === request.status;
-          const isPast = currentIdx >= 0 && i < currentIdx;
-          const isFuture = currentIdx >= 0 && i > currentIdx;
-          return (
-            <div key={s} className="flex items-center gap-1 flex-shrink-0">
-              <div
-                className={cn(
-                  'flex items-center justify-center rounded-full w-7 h-7 transition-colors',
-                  isActive && STEP_COLORS[s],
-                  isPast && 'bg-success/30 text-success',
-                  isFuture && 'bg-surface-2 text-muted-foreground',
-                )}
-                title={REQUEST_STATUS_LABELS[s]}
-              >
-                <Icon className="h-3.5 w-3.5" />
-              </div>
-              {i < PIPELINE.length - 1 && (
-                <div className={cn('w-4 h-0.5 rounded', isPast ? 'bg-success/50' : 'bg-surface-3')} />
-              )}
-            </div>
-          );
-        })}
+        {isAdmin
+          ? PIPELINE.map((s, i) => {
+              const Icon = STEP_ICONS[s];
+              const isActive = s === request.status;
+              const isPast = currentIdx >= 0 && i < currentIdx;
+              const isFuture = currentIdx >= 0 && i > currentIdx;
+              return (
+                <div key={s} className="flex items-center gap-1 flex-shrink-0">
+                  <div
+                    className={cn(
+                      'flex items-center justify-center rounded-full w-7 h-7 transition-colors',
+                      isActive && STEP_COLORS[s],
+                      isPast && 'bg-success/30 text-success',
+                      isFuture && 'bg-surface-2 text-muted-foreground',
+                    )}
+                    title={REQUEST_STATUS_LABELS[s]}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                  </div>
+                  {i < PIPELINE.length - 1 && (
+                    <div className={cn('w-4 h-0.5 rounded', isPast ? 'bg-success/50' : 'bg-surface-3')} />
+                  )}
+                </div>
+              );
+            })
+          : GESTOR_PIPELINE.map((step, i) => {
+              const Icon = step.icon;
+              const isActive = currentPipelineIdx === i;
+              const isPast = currentPipelineIdx >= 0 && i < currentPipelineIdx;
+              const isFuture = currentPipelineIdx >= 0 && i > currentPipelineIdx;
+              return (
+                <div key={step.status} className="flex items-center gap-1 flex-shrink-0">
+                  <div
+                    className={cn(
+                      'flex items-center justify-center rounded-full w-7 h-7 transition-colors',
+                      isActive && 'bg-primary text-primary-foreground',
+                      isPast && 'bg-success/30 text-success',
+                      isFuture && 'bg-surface-2 text-muted-foreground',
+                    )}
+                    title={step.label}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                  </div>
+                  {i < GESTOR_PIPELINE.length - 1 && (
+                    <div className={cn('w-4 h-0.5 rounded', isPast ? 'bg-success/50' : 'bg-surface-3')} />
+                  )}
+                </div>
+              );
+            })}
       </div>
 
       {/* Info grid */}
