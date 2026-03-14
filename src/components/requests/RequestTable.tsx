@@ -68,9 +68,12 @@ interface Props {
   onView: (r: Request) => void;
   onAdvanceStatus?: (r: Request) => void;
   onCancel?: (r: Request) => void;
+  hideSupplierColumn?: boolean;
+  hideAdvanceAction?: boolean;
+  permissions?: RequestPermissions;
 }
 
-export function RequestTable({ requests, onView, onAdvanceStatus, onCancel }: Props) {
+export function RequestTable({ requests, onView, onAdvanceStatus, onCancel, hideSupplierColumn, hideAdvanceAction, permissions }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('createdAt');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
