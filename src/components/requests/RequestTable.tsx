@@ -143,8 +143,10 @@ export function RequestTable({ requests, onView, onAdvanceStatus, onCancel, hide
             const days = getDaysInStage(r);
             const isComplete = r.quantityDelivered >= r.quantity;
             const nextStatuses = VALID_TRANSITIONS[r.status] ?? [];
-            const canAdvance = nextStatuses.length > 0 && nextStatuses[0] !== 'REJEITADA' && nextStatuses[0] !== 'CANCELADA';
-            const canCancel = nextStatuses.includes('CANCELADA');
+            const canAdvance = !hideAdvanceAction && nextStatuses.length > 0 && nextStatuses[0] !== 'REJEITADA' && nextStatuses[0] !== 'CANCELADA';
+            const canCancelThis = permissions?.canCancelOwn
+              ? r.status === 'PENDENTE'
+              : nextStatuses.includes('CANCELADA');
             const isStale = days > 5 && !TERMINAL_STATUSES.includes(r.status);
             const isUrgent = r.priority === 'URGENT';
 
