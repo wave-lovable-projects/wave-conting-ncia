@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useRequest, useUpdateRequestStatus } from '@/hooks/useRequests';
 import { useUIStore } from '@/store/ui.store';
+import { useRequestPermissions } from '@/hooks/useRequestPermissions';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Eye, Truck, Package, Flame, Clock } from 'lucide-react';
 import type { RequestStatus } from '@/types/request';
@@ -37,6 +38,7 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
   const { data: request } = useRequest(requestId);
   const updateStatus = useUpdateRequestStatus();
   const user = useUIStore((s) => s.user);
+  const permissions = useRequestPermissions(user?.role, user?.id);
   const [activeTab, setActiveTab] = useState('overview');
 
   if (!request) return null;
@@ -57,7 +59,12 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
     }
   };
 
-  const actions = STATUS_ACTION[request.status] ?? [];
+  // For ADMIN: show defined actions. For GESTOR: only allow canceling own PENDENTE
+  const actions = permissions.canChangeStatus
+    ? (STATUS_ACTION[request.status] ?? [])
+    : (permissions.canCancelOwn && request.status === 'PENDENTE' && request.requesterId === user?.id)
+      ? [{ label: 'Cancelar Solicitação', next: 'CANCELADA' as RequestStatus, variant: 'destructive' as const }]
+      : [];
 
   return (
     <Sheet open={!!requestId} onOpenChange={(v) => !v && onClose()}>
@@ -69,7 +76,9 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
           <TabsList className="mx-6 w-auto justify-start bg-surface-1 overflow-x-auto">
             <TabsTrigger value="overview" className="gap-1.5 text-xs"><Eye className="h-3.5 w-3.5" />Visão Geral</TabsTrigger>
-            <TabsTrigger value="supplier" className="gap-1.5 text-xs"><Truck className="h-3.5 w-3.5" />Fornecedor</TabsTrigger>
+            {permissions.canViewSupplierInfo && (
+              <TabsTrigger value="supplier" className="gap-1.5 text-xs"><Truck className="h-3.5 w-3.5" />Fornecedor</TabsTrigger>
+            )}
             <TabsTrigger value="assets" className="gap-1.5 text-xs"><Package className="h-3.5 w-3.5" />Ativos</TabsTrigger>
             {showWarmingTab && (
               <TabsTrigger value="warming" className="gap-1.5 text-xs"><Flame className="h-3.5 w-3.5" />Aquecimento</TabsTrigger>
@@ -79,11 +88,13 @@ export function RequestDetailSheet({ requestId, onClose }: Props) {
 
           <div className="flex-1 overflow-y-auto px-6 py-4">
             <TabsContent value="overview" className="mt-0">
-              <OverviewTab request={request} />
+              <OverviewTab request={request} permissions={permissions} />
             </TabsContent>
-            <TabsContent value="supplier" className="mt-0">
-              <SupplierTab request={request} />
-            </TabsContent>
+            {permissions.canViewSupplierInfo && (
+              <TabsContent value="supplier" className="mt-0">
+                <SupplierTab request={request} />
+              </TabsContent>
+            )}
             <TabsContent value="assets" className="mt-0">
               <LinkedAssetsTab request={request} />
             </TabsContent>

@@ -16,6 +16,7 @@ import {
 } from '@/types/request';
 import type { Request, RequestStatus, RequestType } from '@/types/request';
 import { cn } from '@/lib/utils';
+import type { RequestPermissions } from '@/hooks/useRequestPermissions';
 
 const VALID_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
   PENDENTE: ['APROVADA', 'REJEITADA'],
@@ -33,6 +34,29 @@ const PIPELINE: RequestStatus[] = [
   'PENDENTE', 'APROVADA', 'SOLICITADA_FORNECEDOR', 'RECEBIDA',
   'EM_AQUECIMENTO', 'PRONTA', 'ENTREGUE',
 ];
+
+const GESTOR_PIPELINE: { status: string; label: string; icon: React.ElementType }[] = [
+  { status: 'PENDENTE', label: 'Meu Pedido', icon: Clock },
+  { status: 'EM_PREPARACAO', label: 'Em Preparação', icon: Package },
+  { status: 'PRONTA', label: 'Pronto', icon: Gift },
+  { status: 'ENTREGUE', label: 'Entregue', icon: Send },
+];
+
+const GESTOR_STATUS_MAP: Record<RequestStatus, number> = {
+  PENDENTE: 0,
+  APROVADA: 1,
+  SOLICITADA_FORNECEDOR: 1,
+  RECEBIDA: 1,
+  EM_AQUECIMENTO: 1,
+  PRONTA: 2,
+  ENTREGUE: 3,
+  REJEITADA: -1,
+  CANCELADA: -1,
+};
+
+function getGestorIndex(status: RequestStatus): number {
+  return GESTOR_STATUS_MAP[status] ?? -1;
+}
 
 const STEP_ICONS: Record<string, React.ElementType> = {
   PENDENTE: Clock,
@@ -64,9 +88,9 @@ const TYPE_ICONS: Record<RequestType, React.ElementType> = {
   MISTO: Layers,
 };
 
-interface Props { request: Request }
+interface Props { request: Request; permissions?: RequestPermissions }
 
-export function OverviewTab({ request }: Props) {
+export function OverviewTab({ request, permissions }: Props) {
   const updateStatus = useUpdateRequestStatus();
   const updateRequest = useUpdateRequest();
   const user = useUIStore((s) => s.user);
@@ -74,6 +98,10 @@ export function OverviewTab({ request }: Props) {
   const currentIdx = PIPELINE.indexOf(request.status);
   const validNext = VALID_TRANSITIONS[request.status] ?? [];
   const TypeIcon = TYPE_ICONS[request.assetType] ?? Layers;
+
+  const isAdmin = permissions?.isAdmin !== false;
+  const showPipeline = isAdmin ? PIPELINE : GESTOR_PIPELINE;
+  const currentPipelineIdx = isAdmin ? currentIdx : getGestorIndex(request.status);
 
   const handleStatusChange = async (status: string) => {
     try {
@@ -98,30 +126,55 @@ export function OverviewTab({ request }: Props) {
     <div className="space-y-5">
       {/* Pipeline progress */}
       <div className="flex items-center gap-1 overflow-x-auto pb-2">
-        {PIPELINE.map((s, i) => {
-          const Icon = STEP_ICONS[s];
-          const isActive = s === request.status;
-          const isPast = currentIdx >= 0 && i < currentIdx;
-          const isFuture = currentIdx >= 0 && i > currentIdx;
-          return (
-            <div key={s} className="flex items-center gap-1 flex-shrink-0">
-              <div
-                className={cn(
-                  'flex items-center justify-center rounded-full w-7 h-7 transition-colors',
-                  isActive && STEP_COLORS[s],
-                  isPast && 'bg-success/30 text-success',
-                  isFuture && 'bg-surface-2 text-muted-foreground',
-                )}
-                title={REQUEST_STATUS_LABELS[s]}
-              >
-                <Icon className="h-3.5 w-3.5" />
-              </div>
-              {i < PIPELINE.length - 1 && (
-                <div className={cn('w-4 h-0.5 rounded', isPast ? 'bg-success/50' : 'bg-surface-3')} />
-              )}
-            </div>
-          );
-        })}
+        {isAdmin
+          ? PIPELINE.map((s, i) => {
+              const Icon = STEP_ICONS[s];
+              const isActive = s === request.status;
+              const isPast = currentIdx >= 0 && i < currentIdx;
+              const isFuture = currentIdx >= 0 && i > currentIdx;
+              return (
+                <div key={s} className="flex items-center gap-1 flex-shrink-0">
+                  <div
+                    className={cn(
+                      'flex items-center justify-center rounded-full w-7 h-7 transition-colors',
+                      isActive && STEP_COLORS[s],
+                      isPast && 'bg-success/30 text-success',
+                      isFuture && 'bg-surface-2 text-muted-foreground',
+                    )}
+                    title={REQUEST_STATUS_LABELS[s]}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                  </div>
+                  {i < PIPELINE.length - 1 && (
+                    <div className={cn('w-4 h-0.5 rounded', isPast ? 'bg-success/50' : 'bg-surface-3')} />
+                  )}
+                </div>
+              );
+            })
+          : GESTOR_PIPELINE.map((step, i) => {
+              const Icon = step.icon;
+              const isActive = currentPipelineIdx === i;
+              const isPast = currentPipelineIdx >= 0 && i < currentPipelineIdx;
+              const isFuture = currentPipelineIdx >= 0 && i > currentPipelineIdx;
+              return (
+                <div key={step.status} className="flex items-center gap-1 flex-shrink-0">
+                  <div
+                    className={cn(
+                      'flex items-center justify-center rounded-full w-7 h-7 transition-colors',
+                      isActive && 'bg-primary text-primary-foreground',
+                      isPast && 'bg-success/30 text-success',
+                      isFuture && 'bg-surface-2 text-muted-foreground',
+                    )}
+                    title={step.label}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                  </div>
+                  {i < GESTOR_PIPELINE.length - 1 && (
+                    <div className={cn('w-4 h-0.5 rounded', isPast ? 'bg-success/50' : 'bg-surface-3')} />
+                  )}
+                </div>
+              );
+            })}
       </div>
 
       {/* Info grid */}
@@ -139,19 +192,26 @@ export function OverviewTab({ request }: Props) {
         <InfoRow label="Solicitante">
           <span className="text-sm text-foreground">{request.requesterName}</span>
         </InfoRow>
-        <InfoRow label="Responsável">
-          <Select value={request.assigneeId ?? ''} onValueChange={handleAssignee} disabled={updateRequest.isPending}>
-            <SelectTrigger className="w-48 h-8"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
-            <SelectContent>
-              {managers.map((m) => (
-                <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </InfoRow>
+        {isAdmin && (
+          <InfoRow label="Responsável">
+            <Select value={request.assigneeId ?? ''} onValueChange={handleAssignee} disabled={updateRequest.isPending}>
+              <SelectTrigger className="w-48 h-8"><SelectValue placeholder="Selecionar..." /></SelectTrigger>
+              <SelectContent>
+                {managers.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </InfoRow>
+        )}
+        {!isAdmin && request.assigneeName && (
+          <InfoRow label="Responsável">
+            <span className="text-sm text-foreground">{request.assigneeName}</span>
+          </InfoRow>
+        )}
 
         {/* Status select with valid transitions */}
-        {validNext.length > 0 && (
+        {isAdmin && validNext.length > 0 && (
           <InfoRow label="Mudar Status">
             <Select onValueChange={handleStatusChange} disabled={updateStatus.isPending}>
               <SelectTrigger className="w-48 h-8"><SelectValue placeholder={REQUEST_STATUS_LABELS[request.status]} /></SelectTrigger>

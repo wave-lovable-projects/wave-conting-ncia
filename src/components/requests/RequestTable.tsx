@@ -12,6 +12,7 @@ import { format, differenceInDays } from 'date-fns';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
+import type { RequestPermissions } from '@/hooks/useRequestPermissions';
 
 const assetTypeIcon: Record<RequestType, LucideIcon> = {
   CONTA_ANUNCIO: CreditCard,
@@ -67,9 +68,12 @@ interface Props {
   onView: (r: Request) => void;
   onAdvanceStatus?: (r: Request) => void;
   onCancel?: (r: Request) => void;
+  hideSupplierColumn?: boolean;
+  hideAdvanceAction?: boolean;
+  permissions?: RequestPermissions;
 }
 
-export function RequestTable({ requests, onView, onAdvanceStatus, onCancel }: Props) {
+export function RequestTable({ requests, onView, onAdvanceStatus, onCancel, hideSupplierColumn, hideAdvanceAction, permissions }: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('createdAt');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
@@ -127,7 +131,7 @@ export function RequestTable({ requests, onView, onAdvanceStatus, onCancel }: Pr
             <SortHeader label="Status" colKey="status" />
             <SortHeader label="Solicitante" colKey="requesterName" />
             <SortHeader label="Responsável" colKey="assigneeName" />
-            <SortHeader label="Fornecedor" colKey="supplierName" />
+            {!hideSupplierColumn && <SortHeader label="Fornecedor" colKey="supplierName" />}
             <SortHeader label="Data Desejada" colKey="dueDate" />
             <SortHeader label="Tempo na Etapa" colKey="daysInStage" />
             <SortHeader label="Criado em" colKey="createdAt" />
@@ -139,8 +143,10 @@ export function RequestTable({ requests, onView, onAdvanceStatus, onCancel }: Pr
             const days = getDaysInStage(r);
             const isComplete = r.quantityDelivered >= r.quantity;
             const nextStatuses = VALID_TRANSITIONS[r.status] ?? [];
-            const canAdvance = nextStatuses.length > 0 && nextStatuses[0] !== 'REJEITADA' && nextStatuses[0] !== 'CANCELADA';
-            const canCancel = nextStatuses.includes('CANCELADA');
+            const canAdvance = !hideAdvanceAction && nextStatuses.length > 0 && nextStatuses[0] !== 'REJEITADA' && nextStatuses[0] !== 'CANCELADA';
+            const canCancelThis = permissions?.canCancelOwn
+              ? r.status === 'PENDENTE'
+              : nextStatuses.includes('CANCELADA');
             const isStale = days > 5 && !TERMINAL_STATUSES.includes(r.status);
             const isUrgent = r.priority === 'URGENT';
 
@@ -170,7 +176,7 @@ export function RequestTable({ requests, onView, onAdvanceStatus, onCancel }: Pr
                         >
                           <Copy className="h-4 w-4" /> Copiar ID
                         </DropdownMenuItem>
-                        {canCancel && (
+                        {canCancelThis && (
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => onCancel?.(r)} className="gap-2 text-destructive focus:text-destructive">
@@ -206,7 +212,7 @@ export function RequestTable({ requests, onView, onAdvanceStatus, onCancel }: Pr
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">{r.requesterName}</TableCell>
                 <TableCell className="text-muted-foreground text-sm">{r.assigneeName ?? '—'}</TableCell>
-                <TableCell className="text-muted-foreground text-sm">{r.supplierName ?? '—'}</TableCell>
+                {!hideSupplierColumn && <TableCell className="text-muted-foreground text-sm">{r.supplierName ?? '—'}</TableCell>}
                 <TableCell className="text-muted-foreground text-sm">{r.dueDate ? format(new Date(r.dueDate), 'dd/MM/yyyy') : '—'}</TableCell>
                 <TableCell className={cn('text-sm font-medium', days > 10 ? 'text-destructive' : days > 5 ? 'text-warning' : 'text-muted-foreground')}>
                   {formatDaysInStage(days)}
@@ -217,7 +223,7 @@ export function RequestTable({ requests, onView, onAdvanceStatus, onCancel }: Pr
           })}
           {requests.length === 0 && (
             <TableRow>
-              <TableCell colSpan={12} className="text-center text-muted-foreground py-8">Nenhuma solicitação encontrada</TableCell>
+              <TableCell colSpan={hideSupplierColumn ? 11 : 12} className="text-center text-muted-foreground py-8">Nenhuma solicitação encontrada</TableCell>
             </TableRow>
           )}
         </TableBody>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { useRequests, useUpdateRequestStatus, useRequestTemplates, useDeleteRequestTemplate } from '@/hooks/useRequests';
 import { useUIStore } from '@/store/ui.store';
+import { useRequestPermissions } from '@/hooks/useRequestPermissions';
 import { REQUEST_TYPE_LABELS } from '@/types/request';
 import type { RequestFilters, Request, RequestStatus, RequestTemplate } from '@/types/request';
 import { Plus, List, Columns3, BarChart3, ChevronUp, FileText, Briefcase, User, Globe, BarChart2, DollarSign, Layers, Trash2, Play } from 'lucide-react';
@@ -57,6 +58,18 @@ export default function Solicitacoes() {
   const updateStatus = useUpdateRequestStatus();
   const deleteTemplate = useDeleteRequestTemplate();
   const user = useUIStore((s) => s.user);
+  const permissions = useRequestPermissions(user?.role, user?.id);
+
+  // Filter requests by ownership for non-admin users
+  const visibleAll = useMemo(() => {
+    if (permissions.canViewAllRequests || !user) return allRequests ?? [];
+    return (allRequests ?? []).filter((r) => r.requesterId === user.id);
+  }, [allRequests, permissions.canViewAllRequests, user]);
+
+  const visibleFiltered = useMemo(() => {
+    if (permissions.canViewAllRequests || !user) return filteredRequests ?? [];
+    return (filteredRequests ?? []).filter((r) => r.requesterId === user.id);
+  }, [filteredRequests, permissions.canViewAllRequests, user]);
 
   const handleAdvanceStatus = (r: Request) => {
     const nextStatuses = VALID_TRANSITIONS[r.status] ?? [];
@@ -117,7 +130,7 @@ export default function Solicitacoes() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Solicitações"
+        title={permissions.pageTitle}
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -168,7 +181,7 @@ export default function Solicitacoes() {
       <Collapsible open={dashboardOpen} onOpenChange={setDashboardOpen}>
         <CollapsibleContent>
           <RequestDashboard
-            requests={allRequests ?? []}
+            requests={visibleAll}
             onFilterChange={handleDashboardFilter}
           />
         </CollapsibleContent>
@@ -185,13 +198,20 @@ export default function Solicitacoes() {
           <RequestFiltersBar filters={filters} onFilterChange={(f) => setFilters((prev) => ({ ...prev, ...f }))} />
           {view === 'list' ? (
             <RequestTable
-              requests={filteredRequests ?? []}
+              requests={visibleFiltered}
               onView={(r) => setSelectedRequestId(r.id)}
-              onAdvanceStatus={handleAdvanceStatus}
+              onAdvanceStatus={permissions.canChangeStatus ? handleAdvanceStatus : undefined}
               onCancel={handleCancel}
+              hideSupplierColumn={!permissions.canViewSupplierInfo}
+              hideAdvanceAction={!permissions.canChangeStatus}
+              permissions={permissions}
             />
           ) : (
-            <RequestKanbanBoard requests={filteredRequests ?? []} onCardClick={(r) => setSelectedRequestId(r.id)} />
+            <RequestKanbanBoard
+              requests={visibleFiltered}
+              onCardClick={(r) => setSelectedRequestId(r.id)}
+              permissions={permissions}
+            />
           )}
         </>
       )}

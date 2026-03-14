@@ -35,14 +35,14 @@ export default function LoginPage() {
       // Mock login — replace with real API call
       await new Promise((r) => setTimeout(r, 1000));
 
-      if (data.email === 'admin@wave.com' && data.password === '123456') {
-        const mockUser = {
-          id: '1',
-          name: 'Admin Wave',
-          email: data.email,
-          role: 'ADMIN' as const,
-          squadId: null,
-        };
+      const mockUsers: Record<string, { id: string; name: string; role: 'ADMIN' | 'GESTOR'; squadId: string | null }> = {
+        'admin@wave.com': { id: '1', name: 'Admin Wave', role: 'ADMIN', squadId: null },
+        'gestor@wave.com': { id: 'u2', name: 'Carlos Silva', role: 'GESTOR', squadId: 'squad-alpha' },
+      };
+
+      const matched = mockUsers[data.email];
+      if (matched && data.password === '123456') {
+        const mockUser = { ...matched, email: data.email };
         setTokens('mock-access-token', 'mock-refresh-token');
         setUser(mockUser);
         localStorage.setItem('wave_user', JSON.stringify(mockUser));
@@ -129,7 +129,10 @@ export default function LoginPage() {
 
           <div className="mt-6 p-3 rounded-lg bg-surface-1 border border-border-subtle">
             <p className="text-xs text-muted-foreground text-center">
-              <span className="font-medium text-foreground">Demo:</span> admin@wave.com / 123456
+              <span className="font-medium text-foreground">Demo Admin:</span> admin@wave.com / 123456
+            </p>
+            <p className="text-xs text-muted-foreground text-center mt-1">
+              <span className="font-medium text-foreground">Demo Gestor:</span> gestor@wave.com / 123456
             </p>
           </div>
         </div>
