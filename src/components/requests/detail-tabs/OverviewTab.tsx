@@ -95,7 +95,7 @@ export function OverviewTab({ request, permissions }: Props) {
   const managers = getMockUsers().filter((u) => u.role === 'ADMIN' || u.role === 'GESTOR');
   const currentIdx = PIPELINE.indexOf(request.status);
   const validNext = VALID_TRANSITIONS[request.status] ?? [];
-  const TypeIcon = TYPE_ICONS[request.assetType] ?? Layers;
+  const TypeIcon = TYPE_ICONS[request.assetType] ?? DollarSign;
 
   const isAdmin = permissions?.isAdmin !== false;
   const showPipeline = isAdmin ? PIPELINE : GESTOR_PIPELINE;

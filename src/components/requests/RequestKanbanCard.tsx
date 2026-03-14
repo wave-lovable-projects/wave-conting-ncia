@@ -15,7 +15,6 @@ import {
   Target,
   DollarSign,
   Clock,
-  Clock,
   CalendarDays,
   AlertTriangle,
 } from 'lucide-react';
