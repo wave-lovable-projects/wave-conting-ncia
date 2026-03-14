@@ -93,7 +93,8 @@ const ComboboxField = React.forwardRef<HTMLButtonElement, {
   value: string;
   onChange: (val: string) => void;
   placeholder: string;
-}>(({ options, value, onChange, placeholder }, ref) => {
+  portalContainer?: HTMLElement | null;
+}>(({ options, value, onChange, placeholder, portalContainer }, ref) => {
   const [open, setOpen] = useState(false);
   const selectedLabel = options.find((o) => o.value === value)?.label;
 
@@ -111,13 +112,10 @@ const ComboboxField = React.forwardRef<HTMLButtonElement, {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start" container={portalContainer}>
         <Command>
           <CommandInput placeholder="Buscar..." />
-          <CommandList
-            className="max-h-[200px] overflow-y-auto overscroll-contain"
-            onWheelCapture={(e) => e.stopPropagation()}
-          >
+          <CommandList className="max-h-[200px] overflow-y-auto">
             <CommandEmpty>Nenhum resultado.</CommandEmpty>
             {options.map((opt) => (
               <CommandItem
