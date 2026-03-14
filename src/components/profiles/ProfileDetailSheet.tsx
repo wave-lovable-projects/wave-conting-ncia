@@ -39,6 +39,7 @@ const MANAGER_OPTIONS = [
   { value: 'u3', label: 'Carlos Lima' },
 ];
 
+interface ProfileDetailSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   profile: Profile | null;
