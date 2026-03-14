@@ -200,7 +200,6 @@ export default function Solicitacoes() {
 
       <ConfirmDialog
         open={!!deleteTemplateId}
-        onOpenChange={(o) => { if (!o) setDeleteTemplateId(null); }}
         title="Excluir Template"
         description="Tem certeza que deseja excluir este template? Esta ação não pode ser desfeita."
         onConfirm={handleDeleteTemplate}
