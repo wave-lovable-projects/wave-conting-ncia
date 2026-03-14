@@ -43,7 +43,7 @@ const assetTypeUnit: Record<RequestType, string> = {
   BUSINESS_MANAGER: 'BMs',
   PERFIL: 'perfis',
   PAGINA: 'páginas',
-  PIXEL: 'pixels',
+  
   SALDO: 'recargas',
   MISTO: 'itens',
 };

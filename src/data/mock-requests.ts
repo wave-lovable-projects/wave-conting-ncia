@@ -176,7 +176,7 @@ let mockRequests: Request[] = [
   },
   {
     id: 'req16', title: '2 pixels para domínios novos', description: 'Pixels para os novos domínios da campanha de e-commerce',
-    assetType: 'PIXEL', priority: 'MEDIUM', status: 'EM_AQUECIMENTO', quantity: 2, quantityDelivered: 0, linkedAssetIds: [],
+    assetType: 'MISTO', priority: 'MEDIUM', status: 'EM_AQUECIMENTO', quantity: 2, quantityDelivered: 0, linkedAssetIds: [],
     requesterId: 'u2', requesterName: 'Carlos Silva',
     warmingStartDate: '2025-03-10T08:00:00Z', warmingEndDate: '2025-03-17T08:00:00Z',
     attachments: [], createdAt: '2025-03-08T10:00:00Z', updatedAt: '2025-03-10T08:00:00Z',
