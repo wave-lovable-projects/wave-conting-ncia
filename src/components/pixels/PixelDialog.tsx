@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +40,7 @@ export function PixelDialog({ open, onOpenChange, pixel }: PixelDialogProps) {
   const isEditing = !!pixel;
   const bms = getMockBMs();
   const [bmOpen, setBmOpen] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -79,7 +80,7 @@ export function PixelDialog({ open, onOpenChange, pixel }: PixelDialogProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent ref={sheetRef} className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{isEditing ? 'Editar Pixel' : 'Novo Pixel'}</SheetTitle>
           <SheetDescription>{isEditing ? 'Atualize os dados do pixel' : 'Preencha os dados do novo pixel'}</SheetDescription>
@@ -97,10 +98,10 @@ export function PixelDialog({ open, onOpenChange, pixel }: PixelDialogProps) {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start" container={sheetRef.current}>
                   <Command>
                     <CommandInput placeholder="Buscar BM..." />
-                    <CommandList>
+                    <CommandList className="max-h-[200px] overflow-y-auto">
                       <CommandEmpty>Nenhuma BM encontrada.</CommandEmpty>
                       <CommandItem value="__none__" onSelect={() => { field.onChange(''); setBmOpen(false); }}>
                         <Check className={cn("mr-2 h-4 w-4", !field.value ? "opacity-100" : "opacity-0")} />
