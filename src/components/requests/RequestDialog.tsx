@@ -539,6 +539,7 @@ function SpecSaldo({ form, adAccounts, portalContainer }: { form: any; adAccount
               value={field.value || ''}
               onChange={field.onChange}
               placeholder="Selecionar conta"
+              portalContainer={portalContainer}
             />
           </FormControl>
         </FormItem>
