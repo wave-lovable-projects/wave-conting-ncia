@@ -93,7 +93,7 @@ interface Props {
   permissions?: RequestPermissions;
 }
 
-export function RequestKanbanBoard({ requests, onCardClick }: Props) {
+export function RequestKanbanBoard({ requests, onCardClick, permissions }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [closedOpen, setClosedOpen] = useState(false);
   const updateStatus = useUpdateRequestStatus();
