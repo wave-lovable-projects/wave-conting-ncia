@@ -32,7 +32,7 @@ const PRIORITIES = [
 
 const formSchema = z.object({
   title: z.string().trim().min(1, 'Título é obrigatório'),
-  assetType: z.enum(['CONTA_ANUNCIO', 'BUSINESS_MANAGER', 'PERFIL', 'PAGINA', 'PIXEL', 'SALDO', 'MISTO']),
+  assetType: z.enum(['CONTA_ANUNCIO', 'BUSINESS_MANAGER', 'PERFIL', 'PAGINA', 'SALDO', 'MISTO']),
   quantity: z.coerce.number().min(1, 'Mínimo 1'),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']),
   dueDate: z.date().optional(),
@@ -83,9 +83,6 @@ function applySpecsToForm(type: RequestType, specs: Record<string, string>, form
   } else if (type === 'PAGINA') {
     if (specs.nicho) form.setValue('specNiche', specs.nicho);
     if (specs.comHistorico) form.setValue('specHistory', specs.comHistorico === 'Sim');
-  } else if (type === 'PIXEL') {
-    if (specs.dominio) form.setValue('specDomain', specs.dominio);
-    if (specs.bmDesejada) form.setValue('specBm', specs.bmDesejada);
   } else if (type === 'SALDO') {
     if (specs.contaDestino) form.setValue('specDestAccount', specs.contaDestino);
     if (specs.valor) form.setValue('specAmount', specs.valor);
@@ -175,9 +172,6 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
     } else if (t === 'PAGINA') {
       if (values.specNiche) specs.nicho = values.specNiche;
       specs.comHistorico = values.specHistory ? 'Sim' : 'Não';
-    } else if (t === 'PIXEL') {
-      if (values.specDomain) specs.dominio = values.specDomain;
-      if (values.specBm) specs.bmDesejada = values.specBm;
     } else if (t === 'SALDO') {
       if (values.specDestAccount) specs.contaDestino = values.specDestAccount;
       if (values.specAmount) specs.valor = values.specAmount;
@@ -388,8 +382,6 @@ function SpecFields({ type, form, bms, adAccounts }: SpecFieldsProps) {
       return <SpecBM form={form} />;
     case 'PAGINA':
       return <SpecPagina form={form} />;
-    case 'PIXEL':
-      return <SpecPixel form={form} bms={bms} />;
     case 'SALDO':
       return <SpecSaldo form={form} adAccounts={adAccounts} />;
     case 'MISTO':
@@ -535,29 +527,8 @@ function SpecPagina({ form }: { form: any }) {
   );
 }
 
-function SpecPixel({ form, bms }: { form: any; bms: any[] }) {
-  return (
-    <div className="space-y-4">
-      <FormField control={form.control} name="specDomain" render={({ field }) => (
-        <FormItem>
-          <FormLabel>Domínio Alvo</FormLabel>
-          <FormControl><Input placeholder="Ex: meusite.com.br" {...field} /></FormControl>
-        </FormItem>
-      )} />
-      <FormField control={form.control} name="specBm" render={({ field }) => (
-        <FormItem>
-          <FormLabel>BM Desejada (opcional)</FormLabel>
-          <Select value={field.value || ''} onValueChange={field.onChange}>
-            <FormControl><SelectTrigger><SelectValue placeholder="Selecionar BM" /></SelectTrigger></FormControl>
-            <SelectContent>
-              {bms.map((bm) => <SelectItem key={bm.id} value={bm.name}>{bm.name} ({bm.bmId})</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </FormItem>
-      )} />
-    </div>
-  );
-}
+
+
 
 function SpecSaldo({ form, adAccounts }: { form: any; adAccounts: any[] }) {
   return (

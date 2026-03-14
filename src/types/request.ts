@@ -29,7 +29,6 @@ export const REQUEST_TYPES = [
   'BUSINESS_MANAGER',
   'PERFIL',
   'PAGINA',
-  'PIXEL',
   'SALDO',
   'MISTO',
 ] as const;
@@ -41,7 +40,6 @@ export const REQUEST_TYPE_LABELS: Record<RequestType, string> = {
   BUSINESS_MANAGER: 'Business Manager',
   PERFIL: 'Perfil',
   PAGINA: 'Página',
-  PIXEL: 'Pixel',
   SALDO: 'Saldo (Recarga)',
   MISTO: 'Misto',
 };
