@@ -71,17 +71,15 @@ export default function Solicitacoes() {
         title="Solicitações"
         actions={
           <div className="flex items-center gap-2">
-            <CollapsibleTrigger asChild>
-              <Button
-                variant={dashboardOpen ? 'secondary' : 'ghost'}
-                size="sm"
-                className="gap-1.5"
-                onClick={() => setDashboardOpen((o) => !o)}
-              >
-                {dashboardOpen ? <ChevronUp className="h-4 w-4" /> : <BarChart3 className="h-4 w-4" />}
-                {dashboardOpen ? 'Ocultar' : 'Dashboard'}
-              </Button>
-            </CollapsibleTrigger>
+            <Button
+              variant={dashboardOpen ? 'secondary' : 'ghost'}
+              size="sm"
+              className="gap-1.5"
+              onClick={() => setDashboardOpen((o) => !o)}
+            >
+              {dashboardOpen ? <ChevronUp className="h-4 w-4" /> : <BarChart3 className="h-4 w-4" />}
+              {dashboardOpen ? 'Ocultar' : 'Dashboard'}
+            </Button>
             <div className="flex items-center rounded-lg border border-border overflow-hidden">
               <Button
                 variant={view === 'list' ? 'secondary' : 'ghost'}
