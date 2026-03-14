@@ -229,6 +229,13 @@ function ProfileConfigGrid({ profile }: { profile: Profile }) {
       { label: 'Auxiliar', icon: Users, idField: 'auxiliarId', nameField: 'auxiliarName', currentId: profile.auxiliarId || '', currentName: profile.auxiliarName || '', options: MANAGER_OPTIONS },
     ];
 
+    const dateItems: { label: string; icon: React.ElementType; value: string }[] = [
+      { label: 'Dt. Recebimento', icon: CalendarDays, value: profile.receivedAt ? format(new Date(profile.receivedAt), 'dd/MM/yyyy') : '' },
+      { label: 'Dt. Desativação', icon: Ban, value: profile.deactivatedAt ? format(new Date(profile.deactivatedAt), 'dd/MM/yyyy') : '' },
+      { label: 'Criado em', icon: Clock, value: format(new Date(profile.createdAt), 'dd/MM/yyyy HH:mm') },
+      { label: 'Atualizado em', icon: Clock, value: format(new Date(profile.updatedAt), 'dd/MM/yyyy HH:mm') },
+    ];
+
     return (
     <div>
       <h3 className="text-sm font-semibold text-foreground mb-3">Configurações</h3>
