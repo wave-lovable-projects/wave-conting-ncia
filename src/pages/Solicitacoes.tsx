@@ -198,13 +198,20 @@ export default function Solicitacoes() {
           <RequestFiltersBar filters={filters} onFilterChange={(f) => setFilters((prev) => ({ ...prev, ...f }))} />
           {view === 'list' ? (
             <RequestTable
-              requests={filteredRequests ?? []}
+              requests={visibleFiltered}
               onView={(r) => setSelectedRequestId(r.id)}
-              onAdvanceStatus={handleAdvanceStatus}
+              onAdvanceStatus={permissions.canChangeStatus ? handleAdvanceStatus : undefined}
               onCancel={handleCancel}
+              hideSupplierColumn={!permissions.canViewSupplierInfo}
+              hideAdvanceAction={!permissions.canChangeStatus}
+              permissions={permissions}
             />
           ) : (
-            <RequestKanbanBoard requests={filteredRequests ?? []} onCardClick={(r) => setSelectedRequestId(r.id)} />
+            <RequestKanbanBoard
+              requests={visibleFiltered}
+              onCardClick={(r) => setSelectedRequestId(r.id)}
+              permissions={permissions}
+            />
           )}
         </>
       )}
