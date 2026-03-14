@@ -62,10 +62,7 @@ export function PixelTable({ data, total, totalPages, pagination, onPaginationCh
               <TableHead><SortHeader field="name" label="Nome" sortField={sortField} onSort={onSort} /></TableHead>
               <TableHead>Pixel ID</TableHead>
               <TableHead>BM Vinculada</TableHead>
-              <TableHead><SortHeader field="supplierName" label="Fornecedor" sortField={sortField} onSort={onSort} /></TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Domínio</TableHead>
-              <TableHead>Dt. Recebimento</TableHead>
               <TableHead>Dt. Block</TableHead>
               <TableHead>Notas</TableHead>
             </TableRow>
