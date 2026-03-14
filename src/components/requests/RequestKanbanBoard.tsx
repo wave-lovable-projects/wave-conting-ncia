@@ -23,6 +23,8 @@ import { useUIStore } from '@/store/ui.store';
 import { toast } from '@/hooks/use-toast';
 import { ChevronDown, CreditCard, LayoutGrid, UserCircle, Globe, Target, DollarSign, Layers } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import type { RequestPermissions } from '@/hooks/useRequestPermissions';
+import { GESTOR_KANBAN_COLUMNS } from '@/hooks/useRequestPermissions';
 
 const assetTypeIcon: Record<string, LucideIcon> = {
   CONTA_ANUNCIO: CreditCard,
