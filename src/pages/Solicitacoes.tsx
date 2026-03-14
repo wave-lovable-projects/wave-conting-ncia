@@ -181,7 +181,7 @@ export default function Solicitacoes() {
       <Collapsible open={dashboardOpen} onOpenChange={setDashboardOpen}>
         <CollapsibleContent>
           <RequestDashboard
-            requests={allRequests ?? []}
+            requests={visibleAll}
             onFilterChange={handleDashboardFilter}
           />
         </CollapsibleContent>
