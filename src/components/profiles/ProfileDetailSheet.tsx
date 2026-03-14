@@ -21,7 +21,24 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Copy, Shield, Flame, MessageSquare, Plus, Send, CalendarIcon, ExternalLink, Save, Loader2, User, Globe, Key, Eye, EyeOff, Pencil, History, Package, UserCog, Users, Wifi, Clock, CalendarDays, Ban } from 'lucide-react';
 
-interface ProfileDetailSheetProps {
+const STATUS_OPTIONS = [
+  { value: 'ACTIVE', label: 'Ativo' },
+  { value: 'DISABLED', label: 'Desativado' },
+  { value: 'BLOCKED', label: 'Bloqueado' },
+];
+
+const SUPPLIER_OPTIONS = [
+  { value: 's1', label: 'Fornecedor Alpha' },
+  { value: 's2', label: 'Fornecedor Beta' },
+  { value: 's3', label: 'Fornecedor Gamma' },
+];
+
+const MANAGER_OPTIONS = [
+  { value: 'u1', label: 'João Silva' },
+  { value: 'u2', label: 'Maria Souza' },
+  { value: 'u3', label: 'Carlos Lima' },
+];
+
   open: boolean;
   onOpenChange: (open: boolean) => void;
   profile: Profile | null;
