@@ -172,9 +172,6 @@ export function RequestDialog({ open, onOpenChange, initialTemplate }: Props) {
     } else if (t === 'PAGINA') {
       if (values.specNiche) specs.nicho = values.specNiche;
       specs.comHistorico = values.specHistory ? 'Sim' : 'Não';
-    } else if (t === 'PIXEL') {
-      if (values.specDomain) specs.dominio = values.specDomain;
-      if (values.specBm) specs.bmDesejada = values.specBm;
     } else if (t === 'SALDO') {
       if (values.specDestAccount) specs.contaDestino = values.specDestAccount;
       if (values.specAmount) specs.valor = values.specAmount;
