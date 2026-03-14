@@ -29,7 +29,6 @@ export const REQUEST_TYPES = [
   'BUSINESS_MANAGER',
   'PERFIL',
   'PAGINA',
-  'PIXEL',
   'SALDO',
   'MISTO',
 ] as const;
