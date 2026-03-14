@@ -62,10 +62,19 @@ export default function Solicitacoes() {
     const nextStatuses = VALID_TRANSITIONS[r.status] ?? [];
     const next = nextStatuses.find((s) => s !== 'REJEITADA' && s !== 'CANCELADA');
     if (!next) return;
+    const STATUS_TOAST: Record<string, string> = {
+      APROVADA: 'Solicitação aprovada — próximo passo: solicitar ao fornecedor',
+      SOLICITADA_FORNECEDOR: 'Pedido enviado ao fornecedor — acompanhe o prazo de entrega',
+      RECEBIDA: 'Ativos recebidos — inicie o aquecimento',
+      EM_AQUECIMENTO: 'Aquecimento iniciado — monitore o progresso',
+      PRONTA: 'Ativos prontos — entregue ao solicitante',
+      ENTREGUE: 'Solicitação entregue com sucesso!',
+    };
+
     updateStatus.mutate(
       { id: r.id, status: next, changedBy: user?.name ?? 'Sistema' },
       {
-        onSuccess: () => toast.success('Status atualizado com sucesso'),
+        onSuccess: () => toast.success(STATUS_TOAST[next] ?? 'Status atualizado com sucesso'),
         onError: () => toast.error('Erro ao atualizar status'),
       }
     );
@@ -75,7 +84,7 @@ export default function Solicitacoes() {
     updateStatus.mutate(
       { id: r.id, status: 'CANCELADA', changedBy: user?.name ?? 'Sistema' },
       {
-        onSuccess: () => toast.success('Solicitação cancelada'),
+        onSuccess: () => toast.success('Solicitação cancelada — nenhuma ação adicional necessária'),
         onError: () => toast.error('Erro ao cancelar solicitação'),
       }
     );

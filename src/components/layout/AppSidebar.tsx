@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   CreditCard,
   Building2,
@@ -9,16 +10,15 @@ import {
   Users,
   Search,
   Activity,
-  
   Zap,
   PanelLeftClose,
   PanelLeft,
   Waves,
 } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
-import { useLocation } from 'react-router-dom';
 import { useUIStore } from '@/store/ui.store';
 import { Badge } from '@/components/ui/badge';
+import { getMockRequests } from '@/data/mock-requests';
 import {
   Sidebar,
   SidebarContent,
@@ -56,16 +56,9 @@ const contingenciaItems: NavItem[] = [
   { title: 'Pixels', url: '/pixels', icon: Crosshair },
 ];
 
-const gestaoItems: NavItem[] = [
-  { title: 'Fornecedores', url: '/fornecedores', icon: Package },
-  { title: 'Solicitações', url: '/solicitacoes', icon: ClipboardList, badge: 3 },
-  { title: 'Usuários', url: '/usuarios', icon: Users, adminOnly: true },
-];
-
 const outrosItems: NavItem[] = [
   { title: 'Diagnóstico', url: '/diagnostico', icon: Search },
   { title: 'Log de Atividades', url: '/atividades', icon: Activity },
-  
 ];
 
 const metaItems: NavItem[] = [
@@ -144,6 +137,20 @@ export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar();
   const collapsed = state === 'collapsed';
   const user = useUIStore((s) => s.user);
+
+  const gestaoItems: NavItem[] = useMemo(() => {
+    const requests = getMockRequests();
+    const isAdmin = user?.role === 'ADMIN';
+    const badgeCount = isAdmin
+      ? requests.filter((r) => r.status === 'PENDENTE').length
+      : requests.filter((r) => r.status === 'PRONTA').length;
+
+    return [
+      { title: 'Fornecedores', url: '/fornecedores', icon: Package },
+      { title: 'Solicitações', url: '/solicitacoes', icon: ClipboardList, badge: badgeCount },
+      { title: 'Usuários', url: '/usuarios', icon: Users, adminOnly: true },
+    ];
+  }, [user?.role]);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border">
