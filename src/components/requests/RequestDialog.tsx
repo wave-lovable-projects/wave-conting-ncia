@@ -380,8 +380,6 @@ function SpecFields({ type, form, bms, adAccounts }: SpecFieldsProps) {
       return <SpecPagina form={form} />;
     case 'SALDO':
       return <SpecSaldo form={form} adAccounts={adAccounts} />;
-    case 'MISTO':
-      return <SpecMisto form={form} />;
     default:
       return null;
   }
