@@ -212,7 +212,7 @@ export function RequestTable({ requests, onView, onAdvanceStatus, onCancel, hide
                 </TableCell>
                 <TableCell className="text-muted-foreground text-sm">{r.requesterName}</TableCell>
                 <TableCell className="text-muted-foreground text-sm">{r.assigneeName ?? '—'}</TableCell>
-                <TableCell className="text-muted-foreground text-sm">{r.supplierName ?? '—'}</TableCell>
+                {!hideSupplierColumn && <TableCell className="text-muted-foreground text-sm">{r.supplierName ?? '—'}</TableCell>}
                 <TableCell className="text-muted-foreground text-sm">{r.dueDate ? format(new Date(r.dueDate), 'dd/MM/yyyy') : '—'}</TableCell>
                 <TableCell className={cn('text-sm font-medium', days > 10 ? 'text-destructive' : days > 5 ? 'text-warning' : 'text-muted-foreground')}>
                   {formatDaysInStage(days)}
