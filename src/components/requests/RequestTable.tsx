@@ -223,7 +223,7 @@ export function RequestTable({ requests, onView, onAdvanceStatus, onCancel, hide
           })}
           {requests.length === 0 && (
             <TableRow>
-              <TableCell colSpan={12} className="text-center text-muted-foreground py-8">Nenhuma solicitação encontrada</TableCell>
+              <TableCell colSpan={hideSupplierColumn ? 11 : 12} className="text-center text-muted-foreground py-8">Nenhuma solicitação encontrada</TableCell>
             </TableRow>
           )}
         </TableBody>
