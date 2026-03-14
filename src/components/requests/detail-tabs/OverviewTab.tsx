@@ -211,7 +211,7 @@ export function OverviewTab({ request, permissions }: Props) {
         )}
 
         {/* Status select with valid transitions */}
-        {validNext.length > 0 && (
+        {isAdmin && validNext.length > 0 && (
           <InfoRow label="Mudar Status">
             <Select onValueChange={handleStatusChange} disabled={updateStatus.isPending}>
               <SelectTrigger className="w-48 h-8"><SelectValue placeholder={REQUEST_STATUS_LABELS[request.status]} /></SelectTrigger>
