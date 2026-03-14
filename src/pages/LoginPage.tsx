@@ -129,7 +129,10 @@ export default function LoginPage() {
 
           <div className="mt-6 p-3 rounded-lg bg-surface-1 border border-border-subtle">
             <p className="text-xs text-muted-foreground text-center">
-              <span className="font-medium text-foreground">Demo:</span> admin@wave.com / 123456
+              <span className="font-medium text-foreground">Demo Admin:</span> admin@wave.com / 123456
+            </p>
+            <p className="text-xs text-muted-foreground text-center mt-1">
+              <span className="font-medium text-foreground">Demo Gestor:</span> gestor@wave.com / 123456
             </p>
           </div>
         </div>
