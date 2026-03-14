@@ -17,13 +17,12 @@ import type { LucideIcon } from 'lucide-react';
 import type { RequestPermissions } from '@/hooks/useRequestPermissions';
 
 const assetTypeIcon: Record<RequestType, LucideIcon> = {
+const TYPE_ICONS: Record<RequestType, React.ElementType> = {
   CONTA_ANUNCIO: CreditCard,
   BUSINESS_MANAGER: LayoutGrid,
   PERFIL: UserCircle,
   PAGINA: Globe,
-  
   SALDO: DollarSign,
-  MISTO: Layers,
 };
 
 const VALID_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
