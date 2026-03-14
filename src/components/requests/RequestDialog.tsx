@@ -485,7 +485,7 @@ function SpecPerfil({ form }: { form: any }) {
   );
 }
 
-function SpecBM({ form }: { form: any }) {
+function SpecBM({ form, portalContainer }: { form: any; portalContainer?: HTMLElement | null }) {
   const supplierOptions: ComboboxOption[] = mockSuppliers.map((s) => ({
     value: s.name,
     label: s.name,
