@@ -4,14 +4,38 @@ import { PixelStatsCards } from '@/components/pixels/PixelStatsCards';
 import { PixelFiltersBar } from '@/components/pixels/PixelFilters';
 import { PixelTable } from '@/components/pixels/PixelTable';
 import { PixelDialog } from '@/components/pixels/PixelDialog';
-import { BulkActionsBar } from '@/components/shared/BulkActionsBar';
+import { BulkEditBar } from '@/components/shared/BulkEditBar';
 import { AssetConnectionsDialog } from '@/components/shared/AssetConnectionsDialog';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { usePixels, useDeletePixel, useBulkDeletePixels } from '@/hooks/usePixels';
+import { usePixels, useDeletePixel, useBulkDeletePixels, useBulkUpdatePixels } from '@/hooks/usePixels';
 import type { Pixel, PixelFilters, PixelPagination } from '@/types/pixel';
 import { toast } from '@/hooks/use-toast';
+import type { BulkFieldConfig } from '@/components/shared/BulkEditBar';
+
+const STATUS_OPTIONS = [
+  { value: 'ACTIVE', label: 'Ativo' },
+  { value: 'DISABLED', label: 'Desativado' },
+  { value: 'BLOCKED', label: 'Bloqueado' },
+];
+
+const SUPPLIER_OPTIONS = [
+  { value: 's1', label: 'Fornecedor Alpha' },
+  { value: 's2', label: 'Fornecedor Beta' },
+  { value: 's3', label: 'Fornecedor Gamma' },
+];
+
+const BM_OPTIONS = [
+  { value: 'bm-1', label: 'BM Principal Ads' },
+  { value: 'bm-2', label: 'BM Backup 01' },
+  { value: 'bm-3', label: 'BM Pixels Central' },
+  { value: 'bm-5', label: 'BM Misto Geral' },
+  { value: 'bm-6', label: 'BM Ads Escala' },
+  { value: 'bm-8', label: 'BM Pixel Teste' },
+  { value: 'bm-10', label: 'BM Páginas Social' },
+  { value: 'bm-11', label: 'BM Misto Backup' },
+];
 
 export default function Pixels() {
   const [filters, setFilters] = useState<PixelFilters>({});
@@ -28,6 +52,7 @@ export default function Pixels() {
 
   const deletePixel = useDeletePixel();
   const bulkDelete = useBulkDeletePixels();
+  const bulkUpdate = useBulkUpdatePixels();
 
   useEffect(() => {
     const t = setTimeout(() => setFilters(f => ({ ...f, search: searchValue || undefined })), 400);
@@ -66,8 +91,30 @@ export default function Pixels() {
     setSelectedIds(new Set());
   };
 
+  const handleBulkApply = async (values: Record<string, string>) => {
+    const data: Record<string, string> = {};
+    if (values.status) data.status = values.status;
+    if (values.supplierId) {
+      data.supplierId = values.supplierId;
+      data.supplierName = SUPPLIER_OPTIONS.find(s => s.value === values.supplierId)?.label || '';
+    }
+    if (values.bmId) {
+      data.bmId = values.bmId;
+      data.bmName = BM_OPTIONS.find(b => b.value === values.bmId)?.label || '';
+    }
+    await bulkUpdate.mutateAsync({ ids: [...selectedIds], data: data as any });
+    toast({ title: `${selectedIds.size} pixels atualizados` });
+    setSelectedIds(new Set());
+  };
+
+  const bulkFields: BulkFieldConfig[] = [
+    { key: 'status', label: 'Status', options: STATUS_OPTIONS },
+    { key: 'supplierId', label: 'Fornecedor', options: SUPPLIER_OPTIONS },
+    { key: 'bmId', label: 'BM', options: BM_OPTIONS },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       <PageHeader
         title="Pixels"
         description="Gerencie todos os pixels do sistema"
@@ -75,9 +122,6 @@ export default function Pixels() {
       />
       <PixelStatsCards filters={filters} onFilterChange={f => setFilters(p => ({ ...p, ...f }))} />
       <PixelFiltersBar filters={filters} searchValue={searchValue} onSearchChange={setSearchValue} onFilterChange={f => setFilters(p => ({ ...p, ...f }))} onClear={() => { setFilters({}); setSearchValue(''); }} />
-      {selectedIds.size > 0 && (
-        <BulkActionsBar count={selectedIds.size} onBulkDelete={handleBulkDelete} onClear={() => setSelectedIds(new Set())} />
-      )}
       {!isLoading && data && (
         <PixelTable
           data={sorted} total={data.total} totalPages={data.totalPages}
@@ -89,6 +133,18 @@ export default function Pixels() {
           onViewConnections={p => { setConnectionsName(p.name); setConnectionsOpen(true); }}
         />
       )}
+
+      {selectedIds.size > 0 && (
+        <BulkEditBar
+          count={selectedIds.size}
+          fields={bulkFields}
+          onApply={handleBulkApply}
+          onBulkDelete={handleBulkDelete}
+          onClear={() => setSelectedIds(new Set())}
+          isApplying={bulkUpdate.isPending}
+        />
+      )}
+
       <PixelDialog open={dialogOpen} onOpenChange={setDialogOpen} pixel={editingPixel} />
       <AssetConnectionsDialog open={connectionsOpen} onOpenChange={setConnectionsOpen} assetName={connectionsName} />
       <ConfirmDialog open={!!deleteTarget} title="Excluir pixel" description={`Tem certeza que deseja excluir "${deleteTarget?.name}"?`} confirmLabel="Excluir" variant="danger" onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} />

@@ -62,6 +62,18 @@ export function useUpdateBM() {
   });
 }
 
+export function useBulkUpdateBMs() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ids, data }: { ids: string[]; data: Partial<BusinessManager> }) => {
+      const idSet = new Set(ids);
+      setMockBMs(getMockBMs().map(b => idSet.has(b.id) ? { ...b, ...data, updatedAt: new Date().toISOString() } : b));
+      return Promise.resolve();
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['business-managers'] }); },
+  });
+}
+
 export function useDeleteBM() {
   const qc = useQueryClient();
   return useMutation({

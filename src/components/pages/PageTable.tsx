@@ -1,5 +1,6 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { DataTablePagination } from '@/components/shared/DataTablePagination';
@@ -15,6 +16,8 @@ interface PageTableProps {
   totalPages: number;
   pagination: PagePagination;
   onPaginationChange: (p: Partial<PagePagination>) => void;
+  selectedIds: Set<string>;
+  onSelectionChange: (ids: Set<string>) => void;
   sortField: string | null;
   sortDir: 'asc' | 'desc';
   onSort: (field: string) => void;
@@ -32,10 +35,21 @@ function SortHeader({ field, label, sortField, onSort }: { field: string; label:
   );
 }
 
-export function PageTable({ data, total, totalPages, pagination, onPaginationChange, sortField, sortDir, onSort, onEdit, onDelete, onViewConnections }: PageTableProps) {
+export function PageTable({ data, total, totalPages, pagination, onPaginationChange, selectedIds, onSelectionChange, sortField, sortDir, onSort, onEdit, onDelete, onViewConnections }: PageTableProps) {
   if (data.length === 0) return <EmptyState title="Nenhuma página encontrada" description="Ajuste os filtros ou crie uma nova página." icon={FileText} />;
 
   const copyId = (id: string) => { navigator.clipboard.writeText(id); toast({ title: 'Page ID copiado!' }); };
+
+  const allSelected = data.length > 0 && data.every(p => selectedIds.has(p.id));
+  const toggleAll = () => {
+    if (allSelected) onSelectionChange(new Set());
+    else onSelectionChange(new Set(data.map(p => p.id)));
+  };
+  const toggleOne = (id: string) => {
+    const next = new Set(selectedIds);
+    next.has(id) ? next.delete(id) : next.add(id);
+    onSelectionChange(next);
+  };
 
   return (
     <div>
@@ -43,6 +57,7 @@ export function PageTable({ data, total, totalPages, pagination, onPaginationCha
         <Table>
           <TableHeader>
             <TableRow className="bg-surface-1 hover:bg-surface-1">
+              <TableHead className="w-[40px]"><Checkbox checked={allSelected} onCheckedChange={toggleAll} /></TableHead>
               <TableHead><SortHeader field="name" label="Nome" sortField={sortField} onSort={onSort} /></TableHead>
               <TableHead>Page ID</TableHead>
               <TableHead>BM Vinculada</TableHead>
@@ -58,7 +73,8 @@ export function PageTable({ data, total, totalPages, pagination, onPaginationCha
           </TableHeader>
           <TableBody>
             {data.map(p => (
-              <TableRow key={p.id} className="group/row">
+              <TableRow key={p.id} className="group/row" data-state={selectedIds.has(p.id) ? 'selected' : undefined}>
+                <TableCell><Checkbox checked={selectedIds.has(p.id)} onCheckedChange={() => toggleOne(p.id)} /></TableCell>
                 <TableCell className="font-medium text-foreground">
                   <div className="flex items-center gap-1">
                     <span>{p.name}</span>

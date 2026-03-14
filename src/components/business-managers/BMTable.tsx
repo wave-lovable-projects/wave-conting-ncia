@@ -1,6 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { DataTablePagination } from '@/components/shared/DataTablePagination';
@@ -16,6 +17,8 @@ interface BMTableProps {
   totalPages: number;
   pagination: BMPagination;
   onPaginationChange: (p: Partial<BMPagination>) => void;
+  selectedIds: Set<string>;
+  onSelectionChange: (ids: Set<string>) => void;
   sortField: string | null;
   sortDir: 'asc' | 'desc';
   onSort: (field: string) => void;
@@ -33,10 +36,21 @@ function SortHeader({ field, label, sortField, sortDir, onSort }: { field: strin
   );
 }
 
-export function BMTable({ data, total, totalPages, pagination, onPaginationChange, sortField, sortDir, onSort, onEdit, onDelete, onViewConnections }: BMTableProps) {
+export function BMTable({ data, total, totalPages, pagination, onPaginationChange, selectedIds, onSelectionChange, sortField, sortDir, onSort, onEdit, onDelete, onViewConnections }: BMTableProps) {
   if (data.length === 0) return <EmptyState title="Nenhuma BM encontrada" description="Ajuste os filtros ou crie uma nova Business Manager." icon={Building2} />;
 
   const copyId = (id: string) => { navigator.clipboard.writeText(id); toast({ title: 'BM ID copiado!' }); };
+
+  const allSelected = data.length > 0 && data.every(bm => selectedIds.has(bm.id));
+  const toggleAll = () => {
+    if (allSelected) onSelectionChange(new Set());
+    else onSelectionChange(new Set(data.map(bm => bm.id)));
+  };
+  const toggleOne = (id: string) => {
+    const next = new Set(selectedIds);
+    next.has(id) ? next.delete(id) : next.add(id);
+    onSelectionChange(next);
+  };
 
   return (
     <div>
@@ -44,6 +58,7 @@ export function BMTable({ data, total, totalPages, pagination, onPaginationChang
         <Table>
           <TableHeader>
             <TableRow className="bg-surface-1 hover:bg-surface-1">
+              <TableHead className="w-[40px]"><Checkbox checked={allSelected} onCheckedChange={toggleAll} /></TableHead>
               <TableHead><SortHeader field="name" label="Nome" sortField={sortField} sortDir={sortDir} onSort={onSort} /></TableHead>
               <TableHead>BM ID</TableHead>
               <TableHead><SortHeader field="function" label="Função" sortField={sortField} sortDir={sortDir} onSort={onSort} /></TableHead>
@@ -56,7 +71,8 @@ export function BMTable({ data, total, totalPages, pagination, onPaginationChang
           </TableHeader>
           <TableBody>
             {data.map(bm => (
-              <TableRow key={bm.id} className="group/row">
+              <TableRow key={bm.id} className="group/row" data-state={selectedIds.has(bm.id) ? 'selected' : undefined}>
+                <TableCell><Checkbox checked={selectedIds.has(bm.id)} onCheckedChange={() => toggleOne(bm.id)} /></TableCell>
                 <TableCell className="font-medium text-foreground">
                   <div className="flex items-center gap-1">
                     <span>{bm.name}</span>
@@ -99,12 +115,8 @@ export function BMTable({ data, total, totalPages, pagination, onPaginationChang
         </Table>
       </div>
       <DataTablePagination
-        page={pagination.page}
-        totalPages={totalPages}
-        totalItems={total}
-        pageSize={pagination.pageSize}
-        onPageChange={p => onPaginationChange({ page: p })}
-        onPageSizeChange={s => onPaginationChange({ pageSize: s, page: 1 })}
+        page={pagination.page} totalPages={totalPages} totalItems={total} pageSize={pagination.pageSize}
+        onPageChange={p => onPaginationChange({ page: p })} onPageSizeChange={s => onPaginationChange({ pageSize: s, page: 1 })}
       />
     </div>
   );
