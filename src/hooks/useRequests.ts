@@ -12,6 +12,8 @@ function applyFilters(requests: Request[], filters: RequestFilters) {
     if (!matchesFilter(r.requesterId, filters.requesterId)) return false;
     if (!matchesFilter(r.assigneeId, filters.assigneeId)) return false;
     if (!matchesFilter(r.supplierId, filters.supplierId)) return false;
+    if (filters.dateFrom && new Date(r.createdAt) < new Date(filters.dateFrom)) return false;
+    if (filters.dateTo && new Date(r.createdAt) > new Date(filters.dateTo)) return false;
     return true;
   });
 }
