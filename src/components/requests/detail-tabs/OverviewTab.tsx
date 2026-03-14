@@ -35,6 +35,29 @@ const PIPELINE: RequestStatus[] = [
   'EM_AQUECIMENTO', 'PRONTA', 'ENTREGUE',
 ];
 
+const GESTOR_PIPELINE: { status: string; label: string; icon: React.ElementType }[] = [
+  { status: 'PENDENTE', label: 'Meu Pedido', icon: Clock },
+  { status: 'EM_PREPARACAO', label: 'Em Preparação', icon: Package },
+  { status: 'PRONTA', label: 'Pronto', icon: Gift },
+  { status: 'ENTREGUE', label: 'Entregue', icon: Send },
+];
+
+const GESTOR_STATUS_MAP: Record<RequestStatus, number> = {
+  PENDENTE: 0,
+  APROVADA: 1,
+  SOLICITADA_FORNECEDOR: 1,
+  RECEBIDA: 1,
+  EM_AQUECIMENTO: 1,
+  PRONTA: 2,
+  ENTREGUE: 3,
+  REJEITADA: -1,
+  CANCELADA: -1,
+};
+
+function getGestorIndex(status: RequestStatus): number {
+  return GESTOR_STATUS_MAP[status] ?? -1;
+}
+
 const STEP_ICONS: Record<string, React.ElementType> = {
   PENDENTE: Clock,
   APROVADA: Check,
